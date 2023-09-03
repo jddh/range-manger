@@ -1,10 +1,11 @@
-import {useRef} from 'react'
+import {forwardRef, useRef, useImperativeHandle} from 'react'
 import ResizeHandle from './ResizeHandle'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
 
-export default function Nap({className, x , size, containerRect, getContainerRect, mover, sizer}) {
+export default forwardRef(function ({className, x , size, containerRect, getContainerRect, mover, sizer, downHandler}, ref) {
 	const element = useRef(null)
+	useImperativeHandle(ref, () => element.current)
 
 	let currentSize = size
 	let currentOffset = parseInt(size) / 2
@@ -30,6 +31,7 @@ export default function Nap({className, x , size, containerRect, getContainerRec
 	}
 
 	function handleDown(e) {
+		downHandler(e, element.current)
 		currentContainerRect = getContainerRect()
 		currentOffset = getOffset()
 		handleClickDrag(drag)
@@ -59,9 +61,9 @@ export default function Nap({className, x , size, containerRect, getContainerRec
 			<div 
 				onMouseDown={handleDown}
 				onTouchStart={handleTouch}
-				className='label'>nap
+				className='label'>
 			</div>
 			<ResizeHandle containerRect={containerRect} mover={mover} sizer={sizer} parent={element.current} />
 		</div>
 	)
-}
+})
