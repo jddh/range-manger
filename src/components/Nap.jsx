@@ -7,10 +7,8 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	const element = useRef(null)
 	useImperativeHandle(ref, () => element.current)
 
-	let currentSize = size
 	let currentOffset = parseInt(size) / 2
 	let currentContainerRect = containerRect
-	let currentMouseX;
 	const adjustedX = parseInt(x) + currentOffset
 
 	function getSize() {
@@ -19,29 +17,11 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	function getOffset() {
 		return (getSize() / 2)
 	}
-	const getRect = () => element.current.getBoundingClientRect()
-
-	// function isCollision(mouseX) {
-	// 	const rect = getRect()
-	// 	const mouseIntent = mouseX - currentMouseX	// +1 for right
-	// 	if (rect.right >= currentContainerRect.right && mouseIntent > 0 
-	// 		|| rect.left <= currentContainerRect.left && mouseIntent < 0)
-	// 		return true
-	// 	else return false
-	// }
 
 	function handleDown(e) {
 		downHandler(e, element.current)
-		// currentContainerRect = getContainerRect()
-		// currentOffset = getOffset()
-		// handleClickDrag(drag)
 	}
-	// function drag(e) {
-	// 	const mouseX = e.clientX - currentContainerRect.left - currentOffset
-	// 	if (isCollision(mouseX)) return
-	// 	currentMouseX = mouseX
-	// 	mover(element.current, mouseX)
-	// }
+	
 	function handleTouch(e) {
 		currentContainerRect = getContainerRect()
 		currentOffset = getOffset()
@@ -56,8 +36,8 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	
 	return (
 		<div ref={element} className={className + ' nap'} 
-			style={{left: adjustedX + 'px'}}>
-			<ResizeHandle />
+		style={{left: adjustedX + 'px'}}>
+			<ResizeHandle downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} reverse/>
 			<div 
 				onMouseDown={handleDown}
 				onTouchStart={handleTouch}

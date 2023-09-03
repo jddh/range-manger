@@ -37,6 +37,7 @@ export default function ShiftSchedule({children}) {
 		createTravelBounds([clickedEl])
 
 		//register responsive boundaries
+		//TODO move relative to exact cursor, not middle
 		currentContainerRect = getRect(container.current)
 		movingOffset = getOffset(clickedEl)
 		movingEls = [clickedEl]
@@ -51,10 +52,15 @@ export default function ShiftSchedule({children}) {
 		reverseResize = reverse
 		resizeStartX = e.clientX
 		resizeStartWidth = clickedEl.offsetWidth
+		currentMouseX = e.clientX
 
 		handleClickDrag(resizeNapIntent)
 	}
 
+	/**
+	 * calculate dynamic left & right bounds based on container and/or adjacent elements
+	 * @param {array} activeEls 
+	 */
 	function createTravelBounds(activeEls) {
 		const clickedEl = activeEls[0]
 		let dynamicEls = napEls.current.filter(el => el != null && el != clickedEl)
@@ -82,7 +88,6 @@ export default function ShiftSchedule({children}) {
 	}
 
 	function moveNapIntent(e) {
-		//not necessary to pin to container here
 		const mouseX = e.clientX - currentContainerRect.left - movingOffset
 		if (isCollision(mouseX)) return
 		currentMouseX = mouseX
@@ -90,10 +95,13 @@ export default function ShiftSchedule({children}) {
 	}
 
 	function resizeNapIntent(e) {
-		const delta = e.clientX - resizeStartX
+		let delta = e.clientX - resizeStartX
+		if (reverseResize) delta *= -1
 		if (isCollision(e.clientX)) return
+		const reverseMotion = reverseResize ? e.clientX - currentMouseX : false
 		currentMouseX = e.clientX
-		resizeElement(movingEls[0], resizeStartWidth + delta)
+
+		resizeElement(movingEls[0], resizeStartWidth + delta, reverseMotion)
 	}
 
 	function moveElement(el, x) {
@@ -101,9 +109,12 @@ export default function ShiftSchedule({children}) {
 		el.style.left = x + 'px'
 	}
 
-	function resizeElement(el, x) {
+	function resizeElement(el, x, reverse) {
 		if (!el) return
 		el.style.width = x + 'px'
+		if (reverse) {
+			el.style.left = parseInt(el.style.left) + reverse + 'px'
+		}
 	}
 
 	return (
