@@ -2,13 +2,11 @@ import { useRef, useState, useEffect, Children, cloneElement } from 'react'
 import Nap from './Nap'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
+import {createBounds, getRect} from '../functions/geometry'
 import './ShiftSchedule.css'
 
-function getRect(el) {
-	return el.getBoundingClientRect()
-}
-function getOffset(el) {
-	return (el.clientWidth / 2)
+function getOffset(el, e) {
+	return (e.clientX - getRect(el).left)
 }
 
 export default function ShiftSchedule({children}) {
@@ -32,14 +30,13 @@ export default function ShiftSchedule({children}) {
 		setRect(container.current.getBoundingClientRect())
 	}, [])
 
-	function handleNapDown(e, clickedEl) {
+	function handleNapDown(e, clickedEl, callback) {
 		//create dynamic bounding box
 		createTravelBounds([clickedEl])
 
 		//register responsive boundaries
-		//TODO move relative to exact cursor, not middle
 		currentContainerRect = getRect(container.current)
-		movingOffset = getOffset(clickedEl)
+		movingOffset = getOffset(clickedEl, e)
 		movingEls = [clickedEl]
 
 		//activate drag handler
@@ -57,25 +54,25 @@ export default function ShiftSchedule({children}) {
 		handleClickDrag(resizeNapIntent)
 	}
 
+	function upFn() {
+		napEls.current.forEach(ne => {
+			if (ne) {
+				console.log(ne.getBounds())
+			}
+		})
+	}
+
 	/**
 	 * calculate dynamic left & right bounds based on container and/or adjacent elements
 	 * @param {array} activeEls 
 	 */
 	function createTravelBounds(activeEls) {
 		const clickedEl = activeEls[0]
-		let dynamicEls = napEls.current.filter(el => el != null && el != clickedEl)
-		dynamicEls = [...new Set(dynamicEls)]	//unique
-		const thisRect = getRect(clickedEl)
-		let lefts = dynamicEls.map(n => n.getBoundingClientRect().right)
-		lefts.push(rect.left)
-		lefts = lefts.filter(e => e < thisRect.left)
+		let otherEls = napEls.current.filter(el => el != null && !activeEls.includes(el.el))
+		otherEls = otherEls.map(el => el.el)
+		otherEls = [...new Set(otherEls)]	//unique
+		movingRect = createBounds(otherEls, activeEls, container.current)
 
-		let rights = dynamicEls.map(n => n.getBoundingClientRect().left)
-		rights.push(rect.right)
-		rights = rights.filter(e => e > thisRect.right)
-
-		const sortAsc = (a,b) => a-b
-		movingRect = {left: lefts.sort(sortAsc)[lefts.length-1], right: rights.sort(sortAsc)[0]}
 	}
 
 	function isCollision(mouseX) {
@@ -118,18 +115,22 @@ export default function ShiftSchedule({children}) {
 	}
 
 	return (
+		<>
 		<div className="shifts" ref={container}>
 			{Children.map(children, (child, index) => 
 				<Nap 
 					containerRect={rect} 
-					getContainerRect={getRect} 
+					getContainerRect={() => getRect(container.current)} 
 					mover={moveElement} 
 					sizer={resizeElement}
 					downHandler={handleNapDown} 
 					resizeDownHandler={handleNapResizeDown}
 					ref={(element) => napEls.current.push(element)} 
+					key={index}
 					{...child.props} />
 			)}
 		</div>
+		<div className="thumb">move all</div>
+		</>
 	)
 }
