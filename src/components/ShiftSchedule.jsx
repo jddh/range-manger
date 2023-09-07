@@ -3,25 +3,44 @@ import Nap from './Nap'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
 import {createBounds, getRect, createAggregateDimensions} from '../functions/geometry'
+import * as Unit from '../functions/units'
 import './ShiftSchedule.css'
 
-function getOffset(els, e) {
-	return (e.clientX - createAggregateDimensions(els).left)
+function getOffsets(els, e) {
+	const offsets = els.map(el => e.clientX - createAggregateDimensions([el]).left)
+	return offsets
 }
 
-export default function ShiftSchedule({children}) {
+function getPerc(px, total, style = '%') {
+	let perc = px / total
+	switch(style) {
+		case '%':
+			perc = perc * 100 + '%'
+		break
+		case '':
+			perc = perc * 100
+	}
+	return perc
+}
+
+export default function ShiftSchedule({units, children}) {
 	const container = useRef(null)
 	const napEls = useRef(new Array())
 	const [rect, setRect] = useState()
 	const [napData, setNapData] = useState([])
 	const [refsconnect, setRefsconnect] = useState(false)
 
+	//runtime test
+	console.log(Unit.getUnitValue(getPerc(48,100, '')));
+
 	//memory vars for event handlers
 	let currentMouseX, 			//last mouse x pos
 	movingOffset, 				//middle position of moving els
 	currentContainerRect, 		//rect of nap holder
 	movingEls, 					//array of moving els
-	movingRect, 				//boundary rect for movingEls
+	movingRect,					//aggregate moving object
+	movingOffsets,				//array of mouse pos offsets
+	boundingRect, 				//boundary rect for movingEls
 	resizeEl, 					//el being resized
 	resizeStartWidth,			//width before resize
 	resizeStartX,				//mouse x before resize
@@ -64,10 +83,21 @@ export default function ShiftSchedule({children}) {
 
 		//register responsive boundaries
 		currentContainerRect = getRect(container.current)
-		movingOffset = getOffset([clickedEl], e)
+		movingOffsets = getOffsets([clickedEl], e)
+		// console.log(movingOffset)
 		movingEls = [clickedEl]
+		movingRect = createAggregateDimensions(movingEls)
 
 		//activate drag handler
+		handleClickDrag(moveNapIntent)
+	}
+
+	function handleMoveAllDown(e) {
+		movingEls = napData.map(nd => nd.el)
+		createTravelBounds(movingEls)
+		currentContainerRect = getRect(container.current)
+		movingOffsets = getOffsets(movingEls, e)
+		// console.log(movingOffset)
 		handleClickDrag(moveNapIntent)
 	}
 
@@ -97,23 +127,25 @@ export default function ShiftSchedule({children}) {
 	function createTravelBounds(activeEls) {
 		let otherEls = napData.map(nd => nd.el).filter(nd => !activeEls.includes(nd.el))
 
-		movingRect = createBounds(otherEls, activeEls, container.current)
+		boundingRect = createBounds(otherEls, activeEls, container.current)
 	}
 
 	function isCollision(mouseX) {
-		const rect = getRect(movingEls[0])
+		const rect = createAggregateDimensions(movingEls)
 		const mouseIntent = mouseX - currentMouseX	// +1 for right
-		if (rect.right >= movingRect.right && mouseIntent > 0 
-			|| rect.left <= movingRect.left && mouseIntent < 0)
+		if (rect.right >= boundingRect.right && mouseIntent > 0 
+			|| rect.left <= boundingRect.left && mouseIntent < 0)
 			return true
 		else return false
 	}
 
 	function moveNapIntent(e) {
-		const mouseX = e.clientX - currentContainerRect.left - movingOffset
-		if (isCollision(mouseX)) return
-		currentMouseX = mouseX
-		movingEls.forEach(me => moveElement(me, mouseX))
+		if (isCollision(e.clientX)) return
+		currentMouseX = e.clientX
+		movingEls.forEach((me, i) =>{
+			const mouseX = e.clientX - currentContainerRect.left - movingOffsets[i]
+			moveElement(me, mouseX)
+		})
 	}
 
 	function resizeNapIntent(e) {
@@ -156,7 +188,7 @@ export default function ShiftSchedule({children}) {
 					{...child} />
 			)}
 		</div>
-		<div className="thumb">move all</div>
+		<div className="thumb" onMouseDown={handleMoveAllDown}>move all</div>
 		</>
 	)
 }

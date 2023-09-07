@@ -4,11 +4,10 @@ import ShiftSchedule from './components/ShiftSchedule'
 import Nap from './components/Nap'
 
 function App() {
-	const [count, setCount] = useState(0)
 
 	return (
 		<>
-			<ShiftSchedule>
+			<ShiftSchedule units="time">
 				<Nap
 					className="first"
 					x="0"

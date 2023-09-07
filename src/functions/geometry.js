@@ -29,7 +29,7 @@ export function createAggregateDimensions(elements) {
 	let lefts = elements.map(n => getRect(n).left)
 	let rights = elements.map(n => getRect(n).right)
 
-	playerRect = {left: lefts.sort(sortAsc)[lefts.length-1], right: rights.sort(sortAsc)[rights.length-1]}
+	playerRect = {left: lefts.sort(sortAsc)[0], right: rights.sort(sortAsc)[rights.length-1]}
 
 	return playerRect
 }
