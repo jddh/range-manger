@@ -3,9 +3,9 @@ import ResizeHandle from './ResizeHandle'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
 
-export default forwardRef(function ({className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler}, ref) {
+export default forwardRef(function ({className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, id}, ref) {
 	const element = useRef(null)
-	useImperativeHandle(ref, () => ({getBounds: getBounds, el: element.current}))
+	useImperativeHandle(ref, () => ({getBounds: getBounds, el: element.current, id: id}))
 	const [startBound, setStartBound] = useState()
 
 	let currentOffset = parseInt(size) / 2
@@ -29,7 +29,7 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	}
 
 	function handleDown(e) {
-		downHandler(e, element.current)
+		downHandler(e, element.current, id)
 	}
 
 	function handleUp(e) {

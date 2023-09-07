@@ -2,17 +2,19 @@ import { useRef, useState, useEffect, Children, cloneElement } from 'react'
 import Nap from './Nap'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
-import {createBounds, getRect} from '../functions/geometry'
+import {createBounds, getRect, createAggregateDimensions} from '../functions/geometry'
 import './ShiftSchedule.css'
 
-function getOffset(el, e) {
-	return (e.clientX - getRect(el).left)
+function getOffset(els, e) {
+	return (e.clientX - createAggregateDimensions(els).left)
 }
 
 export default function ShiftSchedule({children}) {
 	const container = useRef(null)
 	const napEls = useRef(new Array())
 	const [rect, setRect] = useState()
+	const [napData, setNapData] = useState([])
+	const [refsconnect, setRefsconnect] = useState(false)
 
 	//memory vars for event handlers
 	let currentMouseX, 			//last mouse x pos
@@ -28,7 +30,33 @@ export default function ShiftSchedule({children}) {
 
 	useEffect(function() {
 		setRect(container.current.getBoundingClientRect())
+
+		const ids = 'abcdefghijklmnopq'.split('');
+		const items = Children.map(children, (c) => ({id: ids.shift(), ...c.props}))
+		setNapData([...items])
 	}, [])
+
+	useEffect(() => {
+		if (napEls.current.length && napData?.length) updateRefs()
+	}, [napData])
+
+	/**
+	 * connect refs sent back from children to data
+	 * @returns 
+	 */
+	function updateRefs() {
+		if (refsconnect) return;
+		setNapData(
+		  napData.map((i) => {
+			let item = i;
+			const ix = napEls.current.findIndex((e) => e.id == i.id);
+			item.el = napEls.current[ix].el;
+			// item.sayHello = els.current[ix].sayHello;
+			return i;
+		  })
+		);
+		setRefsconnect(true);
+	}
 
 	function handleNapDown(e, clickedEl, callback) {
 		//create dynamic bounding box
@@ -36,7 +64,7 @@ export default function ShiftSchedule({children}) {
 
 		//register responsive boundaries
 		currentContainerRect = getRect(container.current)
-		movingOffset = getOffset(clickedEl, e)
+		movingOffset = getOffset([clickedEl], e)
 		movingEls = [clickedEl]
 
 		//activate drag handler
@@ -67,12 +95,9 @@ export default function ShiftSchedule({children}) {
 	 * @param {array} activeEls 
 	 */
 	function createTravelBounds(activeEls) {
-		const clickedEl = activeEls[0]
-		let otherEls = napEls.current.filter(el => el != null && !activeEls.includes(el.el))
-		otherEls = otherEls.map(el => el.el)
-		otherEls = [...new Set(otherEls)]	//unique
-		movingRect = createBounds(otherEls, activeEls, container.current)
+		let otherEls = napData.map(nd => nd.el).filter(nd => !activeEls.includes(nd.el))
 
+		movingRect = createBounds(otherEls, activeEls, container.current)
 	}
 
 	function isCollision(mouseX) {
@@ -88,7 +113,7 @@ export default function ShiftSchedule({children}) {
 		const mouseX = e.clientX - currentContainerRect.left - movingOffset
 		if (isCollision(mouseX)) return
 		currentMouseX = mouseX
-		moveElement(movingEls[0], mouseX)
+		movingEls.forEach(me => moveElement(me, mouseX))
 	}
 
 	function resizeNapIntent(e) {
@@ -117,7 +142,7 @@ export default function ShiftSchedule({children}) {
 	return (
 		<>
 		<div className="shifts" ref={container}>
-			{Children.map(children, (child, index) => 
+			{napData.map((child, index) => 
 				<Nap 
 					containerRect={rect} 
 					getContainerRect={() => getRect(container.current)} 
@@ -126,8 +151,9 @@ export default function ShiftSchedule({children}) {
 					downHandler={handleNapDown} 
 					resizeDownHandler={handleNapResizeDown}
 					ref={(element) => napEls.current.push(element)} 
-					key={index}
-					{...child.props} />
+					key={child.id}
+					id={child.id}
+					{...child} />
 			)}
 		</div>
 		<div className="thumb">move all</div>

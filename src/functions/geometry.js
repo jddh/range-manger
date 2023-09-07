@@ -1,5 +1,5 @@
 /**
- * 
+ * given background elements and foreground elements, calculate max left and right travel
  * @param {array} inactiveElements 
  * @param {array, HTMLElement} activeElements 
  * @param {HTMLElement} container 
@@ -7,7 +7,7 @@
  */
 export function createBounds(inactiveElements, activeElements, container) {
 	let boundsRect
-	const player = activeElements.length ? createPlayer(activeElements): getRect(activeElements)
+	const player = activeElements.length ? createAggregateDimensions(activeElements): getRect(activeElements)
 	const containerRect = getRect(container)
 
 	let lefts = inactiveElements.map(n => n.getBoundingClientRect().right)
@@ -23,11 +23,11 @@ export function createBounds(inactiveElements, activeElements, container) {
 	return boundsRect
 }
 
-function createPlayer(elements) {
+export function createAggregateDimensions(elements) {
 	let playerRect
 
-	let lefts = elements.map(n => n.getBoundingClientRect().left)
-	let rights = elements.map(n => n.getBoundingClientRect().right)
+	let lefts = elements.map(n => getRect(n).left)
+	let rights = elements.map(n => getRect(n).right)
 
 	playerRect = {left: lefts.sort(sortAsc)[lefts.length-1], right: rights.sort(sortAsc)[rights.length-1]}
 
