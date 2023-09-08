@@ -3,7 +3,7 @@ import Nap from './Nap'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
 import {createBounds, getRect, createAggregateDimensions} from '../functions/geometry'
-import * as Unit from '../functions/units'
+import * as Units from '../functions/units'
 import './ShiftSchedule.css'
 
 function getOffsets(els, e) {
@@ -31,7 +31,7 @@ export default function ShiftSchedule({units, children}) {
 	const [refsconnect, setRefsconnect] = useState(false)
 
 	//runtime test
-	console.log(Unit.getUnitValue(getPerc(48,100, '')));
+	// console.log(Units.getUnitValue(getPerc(40,100, '')));
 
 	//memory vars for event handlers
 	let currentMouseX, 			//last mouse x pos
@@ -47,6 +47,8 @@ export default function ShiftSchedule({units, children}) {
 	resizeStartX,				//mouse x before resize
 	reverseResize				//reverse resize from left
 
+	//set time range of container
+	Units.setRange([40,80])
 
 	useEffect(function() {
 		setRect(container.current.getBoundingClientRect())
@@ -83,6 +85,13 @@ export default function ShiftSchedule({units, children}) {
 		setRefsconnect(true);
 	}
 
+	//refs will be lost on hmr
+	if (import.meta.hot) {
+		import.meta.hot.on('hmr-update', (data) => {
+			updateRefs()
+		})
+	}
+
 	function getNap(id) {
 		const ix = napData.findIndex((e) => e.id == id);
 		return napData[ix]
@@ -105,10 +114,10 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function testButton(e) {
-		setNap({x: 75}, 'b')
+		console.log(napData)
 	}
 
-	function handleNapDown(e, clickedEl, id) {
+	function handleNapDown(e, clickedEl, id) { 
 		//create dynamic bounding box
 		createTravelBounds([clickedEl])
 
@@ -150,7 +159,8 @@ export default function ShiftSchedule({units, children}) {
 		reverseResize = reverse
 		resizeStartX = e.clientX
 		resizeStartWidth = clickedEl.offsetWidth
-		currentMouseX = e.clientX
+		currentMouseX = e.clientX 
+		currentContainerRect = getRect(container.current)
 
 		handleClickDrag(resizeNapIntent)
 	}
@@ -195,14 +205,16 @@ export default function ShiftSchedule({units, children}) {
 
 	function moveElement(el, x) {
 		if (!el) return
-		el.style.left = x + 'px'
+		el.style.left = pxToCq(x, currentContainerRect.width)
 	}
 
 	function resizeElement(el, x, reverse) {
 		if (!el) return
-		el.style.width = x + 'px'
+		// el.style.width = x + 'px'
+		el.style.width = pxToCq(x, currentContainerRect.width)
 		if (reverse) {
-			el.style.left = parseInt(el.style.left) + reverse + 'px'
+			// el.style.left = parseInt(el.style.left) + reverse + 'px'
+			el.style.left = parseFloat(el.style.left) + getPerc(reverse, currentContainerRect.width) + 'cqi'
 		}
 	}
 
@@ -228,7 +240,7 @@ export default function ShiftSchedule({units, children}) {
 			{napData.map((child, index) => 
 				<div className="data-panel" key={child.id}>
 					<h4>Span {index+1}</h4>
-					<input value={Unit.getUnitValue(child.x)} type='text' />
+					<input value={Units.getUnitValue(child.x)} type='text' disabled />
 				</div>
 			)}
 		</div>
