@@ -15,7 +15,7 @@ function App() {
 				/>
 				<Nap 
 					className="second"
-					x="500"
+					x="40"
 					size="100"
 				/>
 			</ShiftSchedule>

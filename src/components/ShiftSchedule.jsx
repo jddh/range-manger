@@ -11,7 +11,7 @@ function getOffsets(els, e) {
 	return offsets
 }
 
-function getPerc(px, total, style = '%') {
+function getPerc(px, total, style = '') {
 	let perc = px / total
 	switch(style) {
 		case '%':
@@ -41,6 +41,7 @@ export default function ShiftSchedule({units, children}) {
 	movingRect,					//aggregate moving object
 	movingOffsets,				//array of mouse pos offsets
 	boundingRect, 				//boundary rect for movingEls
+	activeIDs,					//array of nap ids moving
 	resizeEl, 					//el being resized
 	resizeStartWidth,			//width before resize
 	resizeStartX,				//mouse x before resize
@@ -52,12 +53,17 @@ export default function ShiftSchedule({units, children}) {
 
 		const ids = 'abcdefghijklmnopq'.split('');
 		const items = Children.map(children, (c) => ({id: ids.shift(), ...c.props}))
+
 		setNapData([...items])
 	}, [])
 
 	useEffect(() => {
 		if (napEls.current.length && napData?.length) updateRefs()
 	}, [napData])
+
+	function pxToCq(px, container = rect.width) {
+		return getPerc(px, container) + 'cqi'
+	}
 
 	/**
 	 * connect refs sent back from children to data
@@ -70,14 +76,39 @@ export default function ShiftSchedule({units, children}) {
 			let item = i;
 			const ix = napEls.current.findIndex((e) => e.id == i.id);
 			item.el = napEls.current[ix].el;
-			// item.sayHello = els.current[ix].sayHello;
+			item.getBounds = napEls.current[ix].getBounds;
 			return i;
 		  })
 		);
 		setRefsconnect(true);
 	}
 
-	function handleNapDown(e, clickedEl, callback) {
+	function getNap(id) {
+		const ix = napData.findIndex((e) => e.id == id);
+		return napData[ix]
+	}
+
+	function setNap(props, id) {
+		const ix = napData.findIndex((e) => e.id == id);
+		let data = [...napData]
+		data[ix] = {...data[ix], ...props}
+		setNapData(data)
+	}
+	function setNaps(naps) {
+		let data = [...napData]
+		naps.forEach(([props, id]) => {
+			const ix = data.findIndex((e) => e.id == id);
+			data[ix] = {...data[ix], ...props}
+		})
+		
+		setNapData(data)
+	}
+
+	function testButton(e) {
+		setNap({x: 75}, 'b')
+	}
+
+	function handleNapDown(e, clickedEl, id) {
 		//create dynamic bounding box
 		createTravelBounds([clickedEl])
 
@@ -87,18 +118,30 @@ export default function ShiftSchedule({units, children}) {
 		// console.log(movingOffset)
 		movingEls = [clickedEl]
 		movingRect = createAggregateDimensions(movingEls)
+		activeIDs = [id]
 
 		//activate drag handler
-		handleClickDrag(moveNapIntent)
+		handleClickDrag(moveNapIntent, releaseNap)
+	}
+
+	function releaseNap() {
+		let napsToUpdate = []
+		activeIDs.forEach(id => {
+			const nap = getNap(id)
+			const left = getPerc(nap.getBounds().left, currentContainerRect.width)
+			napsToUpdate.push([{x: left}, id])
+		})
+		setNaps(napsToUpdate)
 	}
 
 	function handleMoveAllDown(e) {
 		movingEls = napData.map(nd => nd.el)
+		activeIDs = napData.map(nd => nd.id)
 		createTravelBounds(movingEls)
 		currentContainerRect = getRect(container.current)
 		movingOffsets = getOffsets(movingEls, e)
-		// console.log(movingOffset)
-		handleClickDrag(moveNapIntent)
+
+		handleClickDrag(moveNapIntent, releaseNap)
 	}
 
 	function handleNapResizeDown(e, clickedEl, reverse = false) {
@@ -110,14 +153,6 @@ export default function ShiftSchedule({units, children}) {
 		currentMouseX = e.clientX
 
 		handleClickDrag(resizeNapIntent)
-	}
-
-	function upFn() {
-		napEls.current.forEach(ne => {
-			if (ne) {
-				console.log(ne.getBounds())
-			}
-		})
 	}
 
 	/**
@@ -184,11 +219,19 @@ export default function ShiftSchedule({units, children}) {
 					resizeDownHandler={handleNapResizeDown}
 					ref={(element) => napEls.current.push(element)} 
 					key={child.id}
-					id={child.id}
 					{...child} />
 			)}
 		</div>
 		<div className="thumb" onMouseDown={handleMoveAllDown}>move all</div>
+		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
+		<div className="data-panels">
+			{napData.map((child, index) => 
+				<div className="data-panel" key={child.id}>
+					<h4>Span {index+1}</h4>
+					<input value={Unit.getUnitValue(child.x)} type='text' />
+				</div>
+			)}
+		</div>
 		</>
 	)
 }

@@ -1,5 +1,6 @@
 .shifts {
 	position: relative;
+	container-type: inline-size;
 	display: flex;
 	height: 100px;
 	width: 75vw;

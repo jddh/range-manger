@@ -10,7 +10,7 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 
 	let currentOffset = parseInt(size) / 2
 	let currentContainerRect = containerRect
-	const adjustedX = parseInt(x) + currentOffset
+	const adjustedX = x
 
 	function getSize() {
 		return element.current?.clientWidth
@@ -18,14 +18,14 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	function getOffset() {
 		return (getSize() / 2)
 	}
-	function getRect() {
+	function getThisRect() {
 		return element.current?.getBoundingClientRect()
 	}
 	function getBounds() {
-		const rect = getRect()
+		const rect = getThisRect()
 		if (!rect) return null
 		const container = getContainerRect()
-		return rect ? [rect.left - container.left, rect.right] : null
+		return rect ? {left: rect.left - container.left, right: rect.right, width: rect.width} : null
 	}
 
 	function handleDown(e) {
@@ -33,9 +33,9 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	}
 
 	function handleUp(e) {
-		console.log('up');
-		setStartBound(getBounds()[0])
-		// console.log(startBound);
+		// console.log('up');
+		// setStartBound(getBounds()[0])
+		// console.log(getBounds());
 	}
 	
 	function handleTouch(e) {
@@ -52,11 +52,11 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	
 	return (
 		<div ref={element} className={className + ' nap'} 
-		style={{left: adjustedX + 'px'}}>
+		style={{left: adjustedX + 'cqi' }}>
 			<ResizeHandle downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} reverse/>
 			<div 
 				onMouseDown={handleDown}
-				// onMouseUp={handleUp}
+				onMouseUp={handleUp}
 				onTouchStart={handleTouch}
 				className='label'>
 			</div>
