@@ -13,6 +13,7 @@
 	height: 100%;
 	/* margin: 0 3px; */
 	position: absolute;
+	z-index: 2;
 	top: 0;
 	/* transform: translateX(-50%); */
 	border: 1px solid red;
@@ -24,6 +25,15 @@
 	.label {
 		flex: 1;
 	}
+}
+
+.gradiation {
+	position: absolute;
+	z-index: 1;
+	height: 100%;
+	width: 1px;
+	background-color: lightgrey;
+	color: lightgrey;
 }
 
 .resize-handle {

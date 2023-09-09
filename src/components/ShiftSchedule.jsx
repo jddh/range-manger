@@ -1,5 +1,7 @@
 import { useRef, useState, useEffect, Children, cloneElement } from 'react'
 import Nap from './Nap'
+import Gradiation from './Gradiation'
+import useSemiPersistentState from '../hooks/semiPersistentState'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
 import {createBounds, getRect, createAggregateDimensions} from '../functions/geometry'
@@ -27,7 +29,9 @@ export default function ShiftSchedule({units, children}) {
 	const container = useRef(null)
 	const napEls = useRef(new Array())
 	const [rect, setRect] = useState()
-	const [napData, setNapData] = useState([])
+	// const [napData, setNapData] = useState([])
+	const [napData, setNapData] = useSemiPersistentState('napData', [])
+	const [napElLookup, setNapElLookup] = useState([])
 	const [refsconnect, setRefsconnect] = useState(false)
 
 	//runtime test
@@ -48,13 +52,18 @@ export default function ShiftSchedule({units, children}) {
 	reverseResize				//reverse resize from left
 
 	//set time range of container
-	Units.setRange([40,80])
+	const myRange = [40,80]
+	Units.setRange(myRange)
 
 	useEffect(function() {
 		setRect(container.current.getBoundingClientRect())
 
 		const ids = 'abcdefghijklmnopq'.split('');
-		const items = Children.map(children, (c) => ({id: ids.shift(), ...c.props}))
+		const items = Children.map(children, (c, i) => {
+			let formattedChild = {id: ids.shift(), ...c.props}
+			if (napData && napData[i]) formattedChild = {...formattedChild, ...napData[i]}
+			return formattedChild
+		})
 
 		setNapData([...items])
 	}, [])
@@ -73,14 +82,24 @@ export default function ShiftSchedule({units, children}) {
 	 */
 	function updateRefs() {
 		if (refsconnect) return;
-		setNapData(
-		  napData.map((i) => {
-			let item = i;
-			const ix = napEls.current.findIndex((e) => e.id == i.id);
-			item.el = napEls.current[ix].el;
-			item.getBounds = napEls.current[ix].getBounds;
-			return i;
-		  })
+		// setNapData(
+		//   napData.map((i) => {
+		// 	let item = i;
+		// 	const ix = napEls.current.findIndex((e) => e.id == i.id);
+		// 	item.el = napEls.current[ix].el;
+		// 	item.getBounds = napEls.current[ix].getBounds;
+		// 	return i;
+		//   })
+		// );
+		setNapElLookup(
+			napData.map((i) => {
+			  let item = {}
+			  const ix = napEls.current.findIndex((e) => e.id == i.id)
+			  item.id = i.id
+			  item.el = napEls.current[ix].el
+			  item.getBounds = napEls.current[ix].getBounds
+			  return item;
+			})
 		);
 		setRefsconnect(true);
 	}
@@ -95,6 +114,10 @@ export default function ShiftSchedule({units, children}) {
 	function getNap(id) {
 		const ix = napData.findIndex((e) => e.id == id);
 		return napData[ix]
+	}
+
+	function getNapEl(id) {
+		return napElLookup.filter(nte => nte.id == id).shift()
 	}
 
 	function setNap(props, id) {
@@ -114,7 +137,7 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function testButton(e) {
-		console.log(napData)
+		console.log(napElLookup)
 	}
 
 	function handleNapDown(e, clickedEl, id) { 
@@ -137,14 +160,14 @@ export default function ShiftSchedule({units, children}) {
 		let napsToUpdate = []
 		activeIDs.forEach(id => {
 			const nap = getNap(id)
-			const left = getPerc(nap.getBounds().left, currentContainerRect.width)
+			const left = getPerc(getNapEl(nap.id).getBounds().left, currentContainerRect.width)
 			napsToUpdate.push([{x: left}, id])
 		})
 		setNaps(napsToUpdate)
 	}
 
 	function handleMoveAllDown(e) {
-		movingEls = napData.map(nd => nd.el)
+		movingEls = napData.map(({id}) => getNapEl(id).el)
 		activeIDs = napData.map(nd => nd.id)
 		createTravelBounds(movingEls)
 		currentContainerRect = getRect(container.current)
@@ -170,7 +193,7 @@ export default function ShiftSchedule({units, children}) {
 	 * @param {array} activeEls 
 	 */
 	function createTravelBounds(activeEls) {
-		let otherEls = napData.map(nd => nd.el).filter(nd => !activeEls.includes(nd.el))
+		let otherEls = napData.map(({id}) => getNapEl(id).el).filter(nd => !activeEls.includes(nd.el))
 
 		boundingRect = createBounds(otherEls, activeEls, container.current)
 	}
@@ -233,6 +256,7 @@ export default function ShiftSchedule({units, children}) {
 					key={child.id}
 					{...child} />
 			)}
+			<Gradiation count={6} units="time" range={myRange} />
 		</div>
 		<div className="thumb" onMouseDown={handleMoveAllDown}>move all</div>
 		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
