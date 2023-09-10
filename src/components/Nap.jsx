@@ -44,23 +44,24 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 		handleTouchDrag(touchDrag)
 	}
 	function touchDrag(e) {
-		const touchX = e.touches[0].clientX - currentContainerRect.left - currentOffset
-		if (isCollision(touchX)) return
-		currentMouseX = touchX
-		mover(element.current, touchX)
+		// const touchX = e.touches[0].clientX - currentContainerRect.left - currentOffset
+		// if (isCollision(touchX)) return
+		// currentMouseX = touchX
+		// mover(element.current, touchX)
+		downHandler(e, element.current, id)
 	}
 	
 	return (
 		<div ref={element} className={className + ' nap'} 
-		style={{left: adjustedX + 'cqi' }}>
-			<ResizeHandle downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} reverse/>
+		style={{left: adjustedX + 'cqi', width: size + 'cqi'}}>
+			<ResizeHandle downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} id={id} reverse/>
 			<div 
 				onMouseDown={handleDown}
 				onMouseUp={handleUp}
 				onTouchStart={handleTouch}
 				className='label'>
 			</div>
-			<ResizeHandle containerRect={containerRect} downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} />
+			<ResizeHandle containerRect={containerRect} downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} id={id} />
 		</div>
 	)
 })

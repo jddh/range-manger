@@ -16,6 +16,13 @@ export function getUnitValue(perc) {
 	}
 }
 
+export function getPercentFromUnit(val, range = rangeStore) {
+	switch(unitStore) {
+		case 'time':
+			return timeToPercentageOfDay(val, range)
+	}
+}
+
 function percentageOfDayToTime(percentage) {
 	percentage = parseFloat(percentage)
 	if (percentage < 0 || percentage > 100) {
@@ -35,3 +42,24 @@ function percentageOfDayToTime(percentage) {
 
 	return timeString
 }
+
+function timeToPercentageOfDay(time24Hour, range = rangeStore) {
+	let numericalTime = parseInt(time24Hour);
+  
+	if (!numericalTime || numericalTime < 0 || numericalTime > 2359) {
+	  return 'Invalid time format';
+	}
+  
+	const hours = Math.floor(numericalTime / 100);
+	const minutes = numericalTime % 100;
+	const minutesPassed = hours * 60 + minutes;
+  
+	const totalMinutesInDay = 24 * 60;
+	const rangedMinutesInDay = 24 * 60 * ((range[1] - range[0]) / 100);
+	const rangeMinutesPassed = minutesPassed - (range[0] / 100) * totalMinutesInDay;
+	const percentage = (rangeMinutesPassed / rangedMinutesInDay) * 100;
+  
+	return percentage.toFixed(5);
+  }
+
+  

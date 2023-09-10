@@ -3,13 +3,6 @@ import './App.css'
 import ShiftSchedule from './components/ShiftSchedule'
 import Nap from './components/Nap'
 
-if (import.meta.hot) {
-	import.meta.hot.on('hmr-update', (data) => {
-	  // perform custom update
-	  console.log('hihi');
-	})
-  }
-
 function App() {
 
 	return (

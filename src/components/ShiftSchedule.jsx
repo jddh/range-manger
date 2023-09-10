@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, Children, cloneElement } from 'react'
 import Nap from './Nap'
 import Gradiation from './Gradiation'
+import GradiationBee from './GradiationBee'
 import useSemiPersistentState from '../hooks/semiPersistentState'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
@@ -9,7 +10,9 @@ import * as Units from '../functions/units'
 import './ShiftSchedule.css'
 
 function getOffsets(els, e) {
-	const offsets = els.map(el => e.clientX - createAggregateDimensions([el]).left)
+	const clientX = e.touches ? e.touches[0].clientX : e.clientX
+	const offsets = els.map(el => clientX - createAggregateDimensions([el]).left)
+	console.log(offsets);
 	return offsets
 }
 
@@ -52,8 +55,12 @@ export default function ShiftSchedule({units, children}) {
 	reverseResize				//reverse resize from left
 
 	//set time range of container
-	const myRange = [40,80]
+	// const myRange = [40,80]
+	const myRange = [Units.getPercentFromUnit('0800',[0,100]), Units.getPercentFromUnit('2100',[0,100])]
 	Units.setRange(myRange)
+
+	//temp log after range set
+	// console.log(Units.getPercentFromUnit('0800',[25,80]));
 
 	useEffect(function() {
 		setRect(container.current.getBoundingClientRect())
@@ -137,7 +144,8 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function testButton(e) {
-		console.log(napElLookup)
+		console.log(Units.getUnitValue(30))
+		console.log(Units.getPercentFromUnit(1228));
 	}
 
 	function handleNapDown(e, clickedEl, id) { 
@@ -157,11 +165,12 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function releaseNap() {
+		//TODO null mouse move inches elements larger; suspect unit conversion
 		let napsToUpdate = []
 		activeIDs.forEach(id => {
-			const nap = getNap(id)
-			const left = getPerc(getNapEl(nap.id).getBounds().left, currentContainerRect.width)
-			napsToUpdate.push([{x: left}, id])
+			const left = getPerc(getNapEl(id).getBounds().left, currentContainerRect.width)
+			const width = getPerc(getNapEl(id).getBounds().width, currentContainerRect.width)
+			napsToUpdate.push([{x: left, size: width}, id])
 		})
 		setNaps(napsToUpdate)
 	}
@@ -176,16 +185,17 @@ export default function ShiftSchedule({units, children}) {
 		handleClickDrag(moveNapIntent, releaseNap)
 	}
 
-	function handleNapResizeDown(e, clickedEl, reverse = false) {
+	function handleNapResizeDown(e, clickedEl, reverse = false, id) {
 		createTravelBounds([clickedEl])
 		movingEls = [clickedEl]
+		activeIDs = [id]
 		reverseResize = reverse
 		resizeStartX = e.clientX
 		resizeStartWidth = clickedEl.offsetWidth
 		currentMouseX = e.clientX 
 		currentContainerRect = getRect(container.current)
 
-		handleClickDrag(resizeNapIntent)
+		handleClickDrag(resizeNapIntent, releaseNap)
 	}
 
 	/**
@@ -256,15 +266,19 @@ export default function ShiftSchedule({units, children}) {
 					key={child.id}
 					{...child} />
 			)}
-			<Gradiation count={6} units="time" range={myRange} />
+			{/* <Gradiation count={6} units="time" range={myRange} /> */}
+			<GradiationBee  value="1000" units="time" range={myRange}/>
+			<GradiationBee  value="1300" units="time" range={myRange}/>
+			<GradiationBee  value="1600" units="time" range={myRange}/>
 		</div>
 		<div className="thumb" onMouseDown={handleMoveAllDown}>move all</div>
-		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
+		{/* <button onClick={testButton} style={{marginTop: '50px'}}>push me</button> */}
 		<div className="data-panels">
 			{napData.map((child, index) => 
 				<div className="data-panel" key={child.id}>
 					<h4>Span {index+1}</h4>
 					<input value={Units.getUnitValue(child.x)} type='text' disabled />
+					<input value={Units.getUnitValue(child.x + child.size)} type='text' disabled />
 				</div>
 			)}
 		</div>

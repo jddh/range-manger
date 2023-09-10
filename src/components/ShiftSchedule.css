@@ -46,3 +46,11 @@
 	margin-top: 50px;
 	cursor: pointer;
 }
+
+.data-panels {
+	display: flex;
+
+	.data-panel {
+		flex: 1;
+	}
+}
