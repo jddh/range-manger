@@ -10,10 +10,15 @@ import * as Units from '../functions/units'
 import './ShiftSchedule.css'
 
 function getOffsets(els, e) {
-	const clientX = e.touches ? e.touches[0].clientX : e.clientX
+	const clientX = getClientX(e)
 	const offsets = els.map(el => clientX - createAggregateDimensions([el]).left)
 	console.log(offsets);
 	return offsets
+}
+
+function getClientX(e) {
+	//return e.clientX
+	return e.touches ? e.touches[0].clientX : e.clientX
 }
 
 function getPerc(px, total, style = '') {
@@ -112,11 +117,11 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	//refs will be lost on hmr
-	if (import.meta.hot) {
-		import.meta.hot.on('hmr-update', (data) => {
-			updateRefs()
-		})
-	}
+	// if (import.meta.hot) {
+	// 	import.meta.hot.on('hmr-update', (data) => {
+	// 		updateRefs()
+	// 	})
+	// }
 
 	function getNap(id) {
 		const ix = napData.findIndex((e) => e.id == id);
@@ -149,6 +154,7 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function handleNapDown(e, clickedEl, id) { 
+		console.log('nap down');
 		//create dynamic bounding box
 		createTravelBounds([clickedEl])
 
@@ -161,7 +167,8 @@ export default function ShiftSchedule({units, children}) {
 		activeIDs = [id]
 
 		//activate drag handler
-		handleClickDrag(moveNapIntent, releaseNap)
+		if (e.touches) handleTouchDrag(moveNapIntent, releaseNap)
+		else handleClickDrag(moveNapIntent, releaseNap)
 	}
 
 	function releaseNap() {
@@ -182,20 +189,23 @@ export default function ShiftSchedule({units, children}) {
 		currentContainerRect = getRect(container.current)
 		movingOffsets = getOffsets(movingEls, e)
 
-		handleClickDrag(moveNapIntent, releaseNap)
+		if (e.touches) handleTouchDrag(moveNapIntent, releaseNap)
+		else handleClickDrag(moveNapIntent, releaseNap)
 	}
 
 	function handleNapResizeDown(e, clickedEl, reverse = false, id) {
+		let clientX = getClientX(e)
 		createTravelBounds([clickedEl])
 		movingEls = [clickedEl]
 		activeIDs = [id]
 		reverseResize = reverse
-		resizeStartX = e.clientX
+		resizeStartX = clientX
 		resizeStartWidth = clickedEl.offsetWidth
-		currentMouseX = e.clientX 
+		currentMouseX = clientX 
 		currentContainerRect = getRect(container.current)
 
-		handleClickDrag(resizeNapIntent, releaseNap)
+		if (e.touches) handleTouchDrag(resizeNapIntent, releaseNap)
+		else handleClickDrag(resizeNapIntent, releaseNap)
 	}
 
 	/**
@@ -209,6 +219,7 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function isCollision(mouseX) {
+		//TODO repeated collide punches through
 		const rect = createAggregateDimensions(movingEls)
 		const mouseIntent = mouseX - currentMouseX	// +1 for right
 		if (rect.right >= boundingRect.right && mouseIntent > 0 
@@ -218,20 +229,22 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function moveNapIntent(e) {
-		if (isCollision(e.clientX)) return
-		currentMouseX = e.clientX
+		let clientX = getClientX(e)
+		if (isCollision(clientX)) return
+		currentMouseX = clientX
 		movingEls.forEach((me, i) =>{
-			const mouseX = e.clientX - currentContainerRect.left - movingOffsets[i]
+			const mouseX = clientX - currentContainerRect.left - movingOffsets[i]
 			moveElement(me, mouseX)
 		})
 	}
 
 	function resizeNapIntent(e) {
-		let delta = e.clientX - resizeStartX
+		let clientX = getClientX(e)
+		let delta = clientX - resizeStartX
 		if (reverseResize) delta *= -1
-		if (isCollision(e.clientX)) return
-		const reverseMotion = reverseResize ? e.clientX - currentMouseX : false
-		currentMouseX = e.clientX
+		if (isCollision(clientX)) return
+		const reverseMotion = reverseResize ? clientX - currentMouseX : false
+		currentMouseX = clientX
 
 		resizeElement(movingEls[0], resizeStartWidth + delta, reverseMotion)
 	}
@@ -271,14 +284,14 @@ export default function ShiftSchedule({units, children}) {
 			<GradiationBee  value="1300" units="time" range={myRange}/>
 			<GradiationBee  value="1600" units="time" range={myRange}/>
 		</div>
-		<div className="thumb" onMouseDown={handleMoveAllDown}>move all</div>
+		<div className="thumb" onMouseDown={handleMoveAllDown} onTouchStart={handleMoveAllDown}>move all</div>
 		{/* <button onClick={testButton} style={{marginTop: '50px'}}>push me</button> */}
 		<div className="data-panels">
 			{napData.map((child, index) => 
 				<div className="data-panel" key={child.id}>
 					<h4>Span {index+1}</h4>
-					<input value={Units.getUnitValue(child.x)} type='text' disabled />
-					<input value={Units.getUnitValue(child.x + child.size)} type='text' disabled />
+					<label >start </label><input value={Units.getUnitValue(child.x)} type='text' disabled />
+					<label > end </label><input value={Units.getUnitValue(child.x + child.size)} type='text' disabled />
 				</div>
 			)}
 		</div>

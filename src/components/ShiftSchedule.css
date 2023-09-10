@@ -1,9 +1,14 @@
+body {
+	margin: 0;
+}
+
 .shifts {
 	position: relative;
 	container-type: inline-size;
 	display: flex;
 	height: 100px;
 	width: 75vw;
+	margin: 0 auto;
 	border: 1px solid black;
 }
 
@@ -43,7 +48,7 @@
 }
 
 .thumb {
-	margin-top: 50px;
+	margin-top: 10px;
 	cursor: pointer;
 }
 
@@ -52,5 +57,11 @@
 
 	.data-panel {
 		flex: 1;
+	}
+}
+
+@media screen and (max-width: 900px) {
+	.shifts {
+		width: 95vw;
 	}
 }

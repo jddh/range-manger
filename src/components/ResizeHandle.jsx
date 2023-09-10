@@ -10,6 +10,7 @@ export default function ResizeHandle({downHandler, parent, reverse, id}) {
 	return (
 		<div ref={element}
 			onMouseDown={handleDown}
+			onTouchStart={handleDown}
 			className="resize-handle"
 		/>
 	)

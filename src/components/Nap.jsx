@@ -31,23 +31,8 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	function handleDown(e) {
 		downHandler(e, element.current, id)
 	}
-
-	function handleUp(e) {
-		// console.log('up');
-		// setStartBound(getBounds()[0])
-		// console.log(getBounds());
-	}
 	
 	function handleTouch(e) {
-		currentContainerRect = getContainerRect()
-		currentOffset = getOffset()
-		handleTouchDrag(touchDrag)
-	}
-	function touchDrag(e) {
-		// const touchX = e.touches[0].clientX - currentContainerRect.left - currentOffset
-		// if (isCollision(touchX)) return
-		// currentMouseX = touchX
-		// mover(element.current, touchX)
 		downHandler(e, element.current, id)
 	}
 	
@@ -57,8 +42,7 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 			<ResizeHandle downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} id={id} reverse/>
 			<div 
 				onMouseDown={handleDown}
-				onMouseUp={handleUp}
-				onTouchStart={handleTouch}
+				onTouchStart={handleDown}
 				className='label'>
 			</div>
 			<ResizeHandle containerRect={containerRect} downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} id={id} />
