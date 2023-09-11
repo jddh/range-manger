@@ -12,7 +12,6 @@ import './ShiftSchedule.css'
 function getOffsets(els, e) {
 	const clientX = getClientX(e)
 	const offsets = els.map(el => clientX - createAggregateDimensions([el]).left)
-	console.log(offsets);
 	return offsets
 }
 
@@ -138,6 +137,10 @@ export default function ShiftSchedule({units, children}) {
 		data[ix] = {...data[ix], ...props}
 		setNapData(data)
 	}
+	/**
+	 * 
+	 * @param {array} naps [props, id]
+	 */
 	function setNaps(naps) {
 		let data = [...napData]
 		naps.forEach(([props, id]) => {
@@ -149,22 +152,20 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function testButton(e) {
-		console.log(Units.getUnitValue(30))
-		console.log(Units.getPercentFromUnit(1228));
+		console.log(napData);
 	}
 
 	function handleNapDown(e, clickedEl, id) { 
-		console.log('nap down');
 		//create dynamic bounding box
 		createTravelBounds([clickedEl])
 
 		//register responsive boundaries
 		currentContainerRect = getRect(container.current)
 		movingOffsets = getOffsets([clickedEl], e)
-		// console.log(movingOffset)
 		movingEls = [clickedEl]
 		movingRect = createAggregateDimensions(movingEls)
 		activeIDs = [id]
+		setNap({factive: true}, id)
 
 		//activate drag handler
 		if (e.touches) handleTouchDrag(moveNapIntent, releaseNap)
@@ -234,6 +235,12 @@ export default function ShiftSchedule({units, children}) {
 		currentMouseX = clientX
 		movingEls.forEach((me, i) =>{
 			const mouseX = clientX - currentContainerRect.left - movingOffsets[i]
+			//state-based position tooltip
+			setNap({
+				currentBounds: {left: Units.getUnitValue(getPerc(getRect(me).left-currentContainerRect.left, currentContainerRect.width))},
+				factive: true
+			}, activeIDs[i])
+			// end tooltip
 			moveElement(me, mouseX)
 		})
 	}
@@ -277,6 +284,9 @@ export default function ShiftSchedule({units, children}) {
 					resizeDownHandler={handleNapResizeDown}
 					ref={(element) => napEls.current.push(element)} 
 					key={child.id}
+					// factive={child.factive}
+					currentBounds={child.currentBounds}
+					timeRange={myRange}
 					{...child} />
 			)}
 			{/* <Gradiation count={6} units="time" range={myRange} /> */}
@@ -285,7 +295,6 @@ export default function ShiftSchedule({units, children}) {
 			<GradiationBee  value="1600" units="time" range={myRange}/>
 		</div>
 		<div className="thumb" onMouseDown={handleMoveAllDown} onTouchStart={handleMoveAllDown}>move all</div>
-		{/* <button onClick={testButton} style={{marginTop: '50px'}}>push me</button> */}
 		<div className="data-panels">
 			{napData.map((child, index) => 
 				<div className="data-panel" key={child.id}>
@@ -295,6 +304,7 @@ export default function ShiftSchedule({units, children}) {
 				</div>
 			)}
 		</div>
+		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
 		</>
 	)
 }

@@ -30,6 +30,23 @@ body {
 	.label {
 		flex: 1;
 	}
+
+	.active-label {
+		display: none;
+		position: absolute;
+		left: -50px;
+		top: 40%;
+		font-size: .8em;
+		background-color: mediumaquamarine;
+	}
+
+	&.active {
+		background-color: pink;
+
+		.active-label {
+			display: block;
+		}
+	}
 }
 
 .gradiation {
