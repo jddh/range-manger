@@ -56,7 +56,8 @@ export default function ShiftSchedule({units, children}) {
 	resizeEl, 					//el being resized
 	resizeStartWidth,			//width before resize
 	resizeStartX,				//mouse x before resize
-	reverseResize				//reverse resize from left
+	reverseResize,				//reverse resize from left
+	lastActionTimeStamp 
 
 	//set time range of container
 	// const myRange = [40,80]
@@ -64,7 +65,7 @@ export default function ShiftSchedule({units, children}) {
 	Units.setRange(myRange)
 
 	//temp log after range set
-	// console.log(Units.getPercentFromUnit('0800',[25,80]));
+	// console.log(Units.getUnitAmount(20));
 
 	useEffect(function() {
 		setRect(container.current.getBoundingClientRect())
@@ -165,6 +166,7 @@ export default function ShiftSchedule({units, children}) {
 		movingEls = [clickedEl]
 		movingRect = createAggregateDimensions(movingEls)
 		activeIDs = [id]
+		lastActionTimeStamp = new Date().getTime()
 		setNap({factive: true}, id)
 
 		//activate drag handler
@@ -236,10 +238,14 @@ export default function ShiftSchedule({units, children}) {
 		movingEls.forEach((me, i) =>{
 			const mouseX = clientX - currentContainerRect.left - movingOffsets[i]
 			//state-based position tooltip
-			setNap({
-				currentBounds: {left: Units.getUnitValue(getPerc(getRect(me).left-currentContainerRect.left, currentContainerRect.width))},
-				factive: true
-			}, activeIDs[i])
+			// const now = new Date().getTime()
+			// // if (now - lastActionTimeStamp > 200) {
+			// 	setNap({
+			// 		currentBounds: {left: Units.getUnitValue(getPerc(getRect(me).left-currentContainerRect.left, currentContainerRect.width))},
+			// 		factive: true
+			// 	}, activeIDs[i])
+			// lastActionTimeStamp = new Date().getTime()
+			// }
 			// end tooltip
 			moveElement(me, mouseX)
 		})

@@ -50,17 +50,17 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	// timeout-based position tooltip
 	if (factive) {
 		// console.log('active');
-		// window['step' + id] = setInterval(() => {
-		// 	// console.log(getThisRect().left)
-		// 	const bounds = getBounds()
-		// 	const leftTime = Units.getUnitValue(getPerc(bounds.left, currentContainerRect.width))
-		// 	element.current.querySelector('.active-label').innerText = leftTime
-		// }, 200)
+		window['step' + id] = setInterval(() => {
+			// console.log(getThisRect().left)
+			const bounds = getBounds()
+			const leftTime = Units.getUnitValue(getPerc(bounds.left, currentContainerRect.width))
+			element.current.querySelector('.active-label').innerText = leftTime
+		}, 200)
 
 	}
 	else {
 		// console.log('inactive');
-		// clearInterval(window['step' + id])
+		clearInterval(window['step' + id])
 	}
 	// end tooltip
 
