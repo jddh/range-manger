@@ -42,7 +42,7 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 		const rect = getThisRect()
 		if (!rect) return null
 		const container = getContainerRect()
-		return rect ? {left: rect.left - container.left, right: rect.right, width: rect.width} : null
+		return rect ? {left: rect.left - container.left, right: rect.right - container.left, width: rect.width} : null
 	}
 
 	let step
@@ -54,7 +54,12 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 			// console.log(getThisRect().left)
 			const bounds = getBounds()
 			const leftTime = Units.getUnitValue(getPerc(bounds.left, currentContainerRect.width))
-			element.current.querySelector('.active-label').innerText = leftTime
+			const rightTime = Units.getUnitValue(getPerc(bounds.right, currentContainerRect.width))
+			const widthTime = Units.getUnitAmount(getPerc(bounds.width, currentContainerRect.width))
+
+			element.current.querySelector('.active-label.left').innerText = leftTime
+			element.current.querySelector('.active-label.size').innerText = widthTime
+			element.current.querySelector('.active-label.right').innerText = rightTime
 		}, 200)
 
 	}
@@ -82,7 +87,10 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 				className='label'>
 			</div>
 			<ResizeHandle containerRect={containerRect} downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} id={id} />
-			<div className="active-label">{currentBounds && currentBounds.left}{dynamicBounds && dynamicBounds.left}</div>
+
+			<div className="active-label left">{currentBounds && currentBounds.left}{dynamicBounds && dynamicBounds.left}</div>
+			<div className="active-label size"></div>
+			<div className="active-label right"></div>
 		</div>
 	)
 })

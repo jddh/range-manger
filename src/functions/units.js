@@ -56,7 +56,7 @@ function percentageOfDayToMinutes(percentage, range = rangeStore) {
 		return "Invalid percentage"
 	}
 	const rangedMinutesInDay = (24 * 60) * ((rangeStore[1] - rangeStore[0]) / 100)
-	const rangedMinutes = (percentage / 100) * rangedMinutesInDay
+	const rangedMinutes = Math.floor((percentage / 100) * rangedMinutesInDay) + 'mins'
 
 	return rangedMinutes
 }

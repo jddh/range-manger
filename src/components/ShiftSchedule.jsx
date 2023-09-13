@@ -61,7 +61,7 @@ export default function ShiftSchedule({units, children}) {
 
 	//set time range of container
 	// const myRange = [40,80]
-	const myRange = [Units.getPercentFromUnit('0800',[0,100]), Units.getPercentFromUnit('2100',[0,100])]
+	const myRange = [Units.getPercentFromUnit('0800',[0,100]), Units.getPercentFromUnit('1800',[0,100])]
 	Units.setRange(myRange)
 
 	//temp log after range set
@@ -191,6 +191,7 @@ export default function ShiftSchedule({units, children}) {
 		createTravelBounds(movingEls)
 		currentContainerRect = getRect(container.current)
 		movingOffsets = getOffsets(movingEls, e)
+		setNaps(napData.map(nd => [{factive: true}, nd.id]))
 
 		if (e.touches) handleTouchDrag(moveNapIntent, releaseNap)
 		else handleClickDrag(moveNapIntent, releaseNap)
@@ -206,6 +207,7 @@ export default function ShiftSchedule({units, children}) {
 		resizeStartWidth = clickedEl.offsetWidth
 		currentMouseX = clientX 
 		currentContainerRect = getRect(container.current)
+		setNap({factive: true}, id)
 
 		if (e.touches) handleTouchDrag(resizeNapIntent, releaseNap)
 		else handleClickDrag(resizeNapIntent, releaseNap)
@@ -239,7 +241,7 @@ export default function ShiftSchedule({units, children}) {
 			const mouseX = clientX - currentContainerRect.left - movingOffsets[i]
 			//state-based position tooltip
 			// const now = new Date().getTime()
-			// // if (now - lastActionTimeStamp > 200) {
+			// if (now - lastActionTimeStamp > 200) {
 			// 	setNap({
 			// 		currentBounds: {left: Units.getUnitValue(getPerc(getRect(me).left-currentContainerRect.left, currentContainerRect.width))},
 			// 		factive: true

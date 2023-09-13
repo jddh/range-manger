@@ -36,8 +36,17 @@ body {
 		position: absolute;
 		left: -50px;
 		top: 40%;
-		font-size: .8em;
+		font-size: .7em;
 		background-color: mediumaquamarine;
+
+		&.size {
+			left: 30px
+		}
+
+		&.right {
+			left: auto;
+			right: -50px;
+		}
 	}
 
 	&.active {
