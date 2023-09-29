@@ -41,8 +41,9 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	function getBounds() {
 		const rect = getThisRect()
 		if (!rect) return null
+		const leftOffset = -.65	// will increase towards edges of container
 		const container = getContainerRect()
-		return rect ? {left: rect.left - container.left, right: rect.right - container.left, width: rect.width} : null
+		return rect ? {left: (rect.left) - container.left, right: rect.right - container.left, width: rect.width} : null
 	}
 
 	let step

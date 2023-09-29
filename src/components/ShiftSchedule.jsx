@@ -179,12 +179,12 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function releaseNap() {
-		//TODO null mouse move inches elements larger; suspect unit conversion
 		let napsToUpdate = []
 		activeIDs.forEach(id => {
 			const bounds = getNapEl(id).getBounds()
-			const left = getPerc(bounds.left-1, currentContainerRect.width)
-			const width = getPerc(bounds.width-1, currentContainerRect.width)
+			const left = getPerc(bounds.left, currentContainerRect.width)
+			const width = getPerc(bounds.width, currentContainerRect.width)
+			console.log(bounds.left);
 			napsToUpdate.push([{x: left, size: width}, id])
 		})
 		setNaps(napsToUpdate)
@@ -229,7 +229,6 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function isCollision(mouseX) {
-		//TODO repeated collide punches through
 		//TODO why does the below fn need to be called again?
 		const rect = createAggregateDimensions(movingEls)
 		// const recst = movingRect
