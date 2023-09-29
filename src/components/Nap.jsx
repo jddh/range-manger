@@ -26,7 +26,7 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	Units.setRange(timeRange)
 
 	let currentOffset = parseInt(size) / 2
-	let currentContainerRect = containerRect
+	// let currentContainerRect = getContainerRect()
 	const adjustedX = x
 
 	function getSize() {
@@ -50,6 +50,7 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 	// timeout-based position tooltip
 	if (factive) {
 		// console.log('active');
+		let currentContainerRect = getContainerRect()
 		window['step' + id] = setInterval(() => {
 			// console.log(getThisRect().left)
 			const bounds = getBounds()

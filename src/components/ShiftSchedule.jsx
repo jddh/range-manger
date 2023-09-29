@@ -116,12 +116,16 @@ export default function ShiftSchedule({units, children}) {
 		setRefsconnect(true);
 	}
 
+	function clearCache() {
+		localStorage.clear()
+	}
+
 	//refs will be lost on hmr
-	// if (import.meta.hot) {
-	// 	import.meta.hot.on('hmr-update', (data) => {
-	// 		updateRefs()
-	// 	})
-	// }
+	if (import.meta.hot) {
+		import.meta.hot.on('hmr-update', (data) => {
+			updateRefs()
+		})
+	}
 
 	function getNap(id) {
 		const ix = napData.findIndex((e) => e.id == id);
@@ -153,7 +157,7 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function testButton(e) {
-		console.log(napData);
+		clearCache()
 	}
 
 	function handleNapDown(e, clickedEl, id) { 
@@ -178,8 +182,9 @@ export default function ShiftSchedule({units, children}) {
 		//TODO null mouse move inches elements larger; suspect unit conversion
 		let napsToUpdate = []
 		activeIDs.forEach(id => {
-			const left = getPerc(getNapEl(id).getBounds().left, currentContainerRect.width)
-			const width = getPerc(getNapEl(id).getBounds().width, currentContainerRect.width)
+			const bounds = getNapEl(id).getBounds()
+			const left = getPerc(bounds.left-1, currentContainerRect.width)
+			const width = getPerc(bounds.width-1, currentContainerRect.width)
 			napsToUpdate.push([{x: left, size: width}, id])
 		})
 		setNaps(napsToUpdate)
@@ -225,17 +230,27 @@ export default function ShiftSchedule({units, children}) {
 
 	function isCollision(mouseX) {
 		//TODO repeated collide punches through
+		//TODO why does the below fn need to be called again?
 		const rect = createAggregateDimensions(movingEls)
+		// const recst = movingRect
 		const mouseIntent = mouseX - currentMouseX	// +1 for right
-		if (rect.right >= boundingRect.right && mouseIntent > 0 
-			|| rect.left <= boundingRect.left && mouseIntent < 0)
+		if (rect.right + mouseIntent >= boundingRect.right && mouseIntent > 0 
+			|| rect.left + mouseIntent <= boundingRect.left && mouseIntent < 0)
 			return true
 		else return false
+	}
+
+	function snapToBounds(mouseX) {
+		const direction = (mouseX - currentMouseX > 0) ? 'right': 'left'
+		const rect = createAggregateDimensions(movingEls)
+		const distance = rect.left - boundingRect.left
+		movingEls.forEach(me => moveElement(me, (rect.left - distance)))
 	}
 
 	function moveNapIntent(e) {
 		let clientX = getClientX(e)
 		if (isCollision(clientX)) return
+		// {snapToBounds(clientX); return}
 		currentMouseX = clientX
 		movingEls.forEach((me, i) =>{
 			const mouseX = clientX - currentContainerRect.left - movingOffsets[i]
@@ -281,7 +296,7 @@ export default function ShiftSchedule({units, children}) {
 
 	return (
 		<>
-		<div className="shifts" ref={container}>
+		<div className="shifts ui" ref={container}>
 			{napData.map((child, index) => 
 				<Nap 
 					containerRect={rect} 
@@ -302,7 +317,7 @@ export default function ShiftSchedule({units, children}) {
 			<GradiationBee  value="1300" units="time" range={myRange}/>
 			<GradiationBee  value="1600" units="time" range={myRange}/>
 		</div>
-		<div className="thumb" onMouseDown={handleMoveAllDown} onTouchStart={handleMoveAllDown}>move all</div>
+		<div className="thumb ui" onMouseDown={handleMoveAllDown} onTouchStart={handleMoveAllDown}>move all</div>
 		<div className="data-panels">
 			{napData.map((child, index) => 
 				<div className="data-panel" key={child.id}>
