@@ -20,6 +20,10 @@ function getClientX(e) {
 	return e.touches ? e.touches[0].clientX : e.clientX
 }
 
+function clearCache() {
+	localStorage.clear()
+}
+
 function getPerc(px, total, style = '') {
 	let perc = px / total
 	switch(style) {
@@ -35,8 +39,7 @@ function getPerc(px, total, style = '') {
 export default function ShiftSchedule({units, children}) {
 	const container = useRef(null)
 	const napEls = useRef(new Array())
-	const [rect, setRect] = useState()
-	// const [napData, setNapData] = useState([])
+	const [containerRect, setRect] = useState()
 	const [napData, setNapData] = useSemiPersistentState('napData', [])
 	const [napElLookup, setNapElLookup] = useState([])
 	const [refsconnect, setRefsconnect] = useState(false)
@@ -61,7 +64,10 @@ export default function ShiftSchedule({units, children}) {
 
 	//set time range of container
 	// const myRange = [40,80]
+	const myUnit = 'time'
+	Units.setUnit(myUnit)
 	const myRange = [Units.getPercentFromUnit('0800',[0,100]), Units.getPercentFromUnit('1800',[0,100])]
+	// const myRange = [0,1000]
 	Units.setRange(myRange)
 
 	//temp log after range set
@@ -77,14 +83,14 @@ export default function ShiftSchedule({units, children}) {
 			return formattedChild
 		})
 
-		setNapData([...items])
+		setNapData(items) 
 	}, [])
 
 	useEffect(() => {
 		if (napEls.current.length && napData?.length) updateRefs()
 	}, [napData])
 
-	function pxToCq(px, container = rect.width) {
+	function pxToCq(px, container = containerRect.width) {
 		return getPerc(px, container) + 'cqi'
 	}
 
@@ -94,15 +100,6 @@ export default function ShiftSchedule({units, children}) {
 	 */
 	function updateRefs() {
 		if (refsconnect) return;
-		// setNapData(
-		//   napData.map((i) => {
-		// 	let item = i;
-		// 	const ix = napEls.current.findIndex((e) => e.id == i.id);
-		// 	item.el = napEls.current[ix].el;
-		// 	item.getBounds = napEls.current[ix].getBounds;
-		// 	return i;
-		//   })
-		// );
 		setNapElLookup(
 			napData.map((i) => {
 			  let item = {}
@@ -114,10 +111,6 @@ export default function ShiftSchedule({units, children}) {
 			})
 		);
 		setRefsconnect(true);
-	}
-
-	function clearCache() {
-		localStorage.clear()
 	}
 
 	//refs will be lost on hmr
@@ -132,7 +125,7 @@ export default function ShiftSchedule({units, children}) {
 		return napData[ix]
 	}
 
-	function getNapEl(id) {
+	function getNapRef(id) {
 		return napElLookup.filter(nte => nte.id == id).shift()
 	}
 
@@ -142,6 +135,7 @@ export default function ShiftSchedule({units, children}) {
 		data[ix] = {...data[ix], ...props}
 		setNapData(data)
 	}
+
 	/**
 	 * 
 	 * @param {array} naps [props, id]
@@ -157,7 +151,8 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function testButton(e) {
-		clearCache()
+		// clearCache()
+		console.log(napElLookup);
 	}
 
 	function handleNapDown(e, clickedEl, id) { 
@@ -181,17 +176,16 @@ export default function ShiftSchedule({units, children}) {
 	function releaseNap() {
 		let napsToUpdate = []
 		activeIDs.forEach(id => {
-			const bounds = getNapEl(id).getBounds()
+			const bounds = getNapRef(id).getBounds()
 			const left = getPerc(bounds.left, currentContainerRect.width)
 			const width = getPerc(bounds.width, currentContainerRect.width)
-			console.log(bounds.left);
 			napsToUpdate.push([{x: left, size: width}, id])
 		})
 		setNaps(napsToUpdate)
 	}
 
 	function handleMoveAllDown(e) {
-		movingEls = napData.map(({id}) => getNapEl(id).el)
+		movingEls = napData.map(({id}) => getNapRef(id).el)
 		activeIDs = napData.map(nd => nd.id)
 		createTravelBounds(movingEls)
 		currentContainerRect = getRect(container.current)
@@ -223,15 +217,13 @@ export default function ShiftSchedule({units, children}) {
 	 * @param {array} activeEls 
 	 */
 	function createTravelBounds(activeEls) {
-		let otherEls = napData.map(({id}) => getNapEl(id).el).filter(nd => !activeEls.includes(nd.el))
+		const otherEls = napElLookup.map(({el}) => el).filter(el => !activeEls.includes(el))
 
 		boundingRect = createBounds(otherEls, activeEls, container.current)
 	}
 
 	function isCollision(mouseX) {
-		//TODO why does the below fn need to be called again?
 		const rect = createAggregateDimensions(movingEls)
-		// const recst = movingRect
 		const mouseIntent = mouseX - currentMouseX	// +1 for right
 		if (rect.right + mouseIntent >= boundingRect.right && mouseIntent > 0 
 			|| rect.left + mouseIntent <= boundingRect.left && mouseIntent < 0)
@@ -253,16 +245,6 @@ export default function ShiftSchedule({units, children}) {
 		currentMouseX = clientX
 		movingEls.forEach((me, i) =>{
 			const mouseX = clientX - currentContainerRect.left - movingOffsets[i]
-			//state-based position tooltip
-			// const now = new Date().getTime()
-			// if (now - lastActionTimeStamp > 200) {
-			// 	setNap({
-			// 		currentBounds: {left: Units.getUnitValue(getPerc(getRect(me).left-currentContainerRect.left, currentContainerRect.width))},
-			// 		factive: true
-			// 	}, activeIDs[i])
-			// lastActionTimeStamp = new Date().getTime()
-			// }
-			// end tooltip
 			moveElement(me, mouseX)
 		})
 	}
@@ -298,7 +280,7 @@ export default function ShiftSchedule({units, children}) {
 		<div className="shifts ui" ref={container}>
 			{napData.map((child, index) => 
 				<Nap 
-					containerRect={rect} 
+					containerRect={containerRect} 
 					getContainerRect={() => getRect(container.current)} 
 					mover={moveElement} 
 					sizer={resizeElement}
@@ -309,12 +291,13 @@ export default function ShiftSchedule({units, children}) {
 					// factive={child.factive}
 					currentBounds={child.currentBounds}
 					timeRange={myRange}
+					units={myUnit}
 					{...child} />
 			)}
 			{/* <Gradiation count={6} units="time" range={myRange} /> */}
-			<GradiationBee  value="1000" units="time" range={myRange}/>
-			<GradiationBee  value="1300" units="time" range={myRange}/>
-			<GradiationBee  value="1600" units="time" range={myRange}/>
+			<GradiationBee  value="1000" units={myUnit} range={myRange}/>
+			<GradiationBee  value="1300" units={myUnit} range={myRange}/>
+			<GradiationBee  value="1600" units={myUnit} range={myRange}/>
 		</div>
 		<div className="thumb ui" onMouseDown={handleMoveAllDown} onTouchStart={handleMoveAllDown}>move all</div>
 		<div className="data-panels">

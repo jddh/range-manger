@@ -17,12 +17,13 @@ function getPerc(px, total, style = '') {
 	return perc
 }
 
-export default forwardRef(function ({className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, id, factive, currentBounds, timeRange}, ref) {
+export default forwardRef(function ({className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, id, factive, currentBounds, timeRange, units}, ref) {
 	const element = useRef(null)
 	useImperativeHandle(ref, () => ({getBounds: getBounds, el: element.current, id: id}))
 	const [startBound, setStartBound] = useState()
 	const [dynamicBounds, setdynamicBounds] = useState()
 
+	Units.setUnit(units)
 	Units.setRange(timeRange)
 
 	let currentOffset = parseInt(size) / 2
