@@ -55,7 +55,7 @@ body {
 	}
 
 	&.active {
-		background-color: pink;
+		background-color: #ffc0cb85;
 
 		.active-label {
 			display: block;
@@ -79,8 +79,11 @@ body {
 }
 
 .thumb {
+	display: inline-block;
 	margin-top: 10px;
+	padding: .2em;
 	cursor: pointer;
+	background-color: silver;
 }
 
 .data-panels {
@@ -88,6 +91,14 @@ body {
 
 	.data-panel {
 		flex: 1;
+
+		& input {
+			max-width: 8em;
+
+			&[type=number] {
+				max-width: 3em;
+			}
+		}
 	}
 }
 

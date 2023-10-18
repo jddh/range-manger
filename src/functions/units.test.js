@@ -43,6 +43,12 @@ test('24 hr time output', () => {
 	expect(Units.getUnitValue(33.4,[0,100], 24)).toBe('0800')
 })
 
+it('should make minutes into percentage', () => {
+	const per = 45
+	const fractionalMinutes = 1440 * (per/100)
+	expect(Units.minutesToPercentageOfDay(fractionalMinutes)).toBe(per)
+})
+
 test('round time string', () => {
 	const constraint = [Units.getPercentFromUnit('0800',[0,100]), Units.getPercentFromUnit('1800',[0,100])]
 

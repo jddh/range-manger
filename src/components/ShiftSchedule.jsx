@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, Children, cloneElement } from 'react'
 import Nap from './Nap'
 import Gradiation from './Gradiation'
 import GradiationBee from './GradiationBee'
+import DataPanel from './DataPanel'
 import useSemiPersistentState from '../hooks/semiPersistentState'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
@@ -66,7 +67,7 @@ export default function ShiftSchedule({units, children}) {
 	// const myRange = [40,80]
 	const myUnit = 'time'
 	Units.setUnit(myUnit)
-	const myRange = [Units.getPercentFromUnit('0800',[0,100]), Units.getPercentFromUnit('1800',[0,100])]
+	const myRange = [Units.getPercentFromUnit('1000',[0,100]), Units.getPercentFromUnit('1800',[0,100])]
 	// const myRange = [0,1000]
 	Units.setRange(myRange)
 
@@ -259,7 +260,7 @@ export default function ShiftSchedule({units, children}) {
 
 		resizeElement(movingEls[0], resizeStartWidth + delta, reverseMotion)
 	}
-
+	
 	function moveElement(el, x) {
 		if (!el) return
 		el.style.left = pxToCq(x, currentContainerRect.width)
@@ -295,20 +296,26 @@ export default function ShiftSchedule({units, children}) {
 					{...child} />
 			)}
 			{/* <Gradiation count={6} units="time" range={myRange} /> */}
-			<GradiationBee  value="1000" units={myUnit} range={myRange}/>
+			<GradiationBee  value="1100" units={myUnit} range={myRange}/>
 			<GradiationBee  value="1300" units={myUnit} range={myRange}/>
 			<GradiationBee  value="1600" units={myUnit} range={myRange}/>
 		</div>
 		<div className="thumb ui" onMouseDown={handleMoveAllDown} onTouchStart={handleMoveAllDown}>move all</div>
-		<div className="data-panels">
+		{/* <div className="data-panels">
 			{napData.map((child, index) => 
 				<div className="data-panel" key={child.id}>
 					<h4>Span {index+1}</h4>
-					<label >start </label><input value={Units.getUnitValue(child.x)} type='text' disabled />
-					<label > end </label><input value={Units.getUnitValue(child.x + child.size)} type='text' disabled />
+					<label >start </label><input className='output' value={Units.getUnitValue(child.x)} onChange={() => handleFieldChange(e, child)} type='text' disabled />
+					<label>length </label><input className='output' type="text" value={Units.getUnitAmount(child.size)} disabled/>
+					<label > end </label><input className='output' value={Units.getUnitValue(child.x + child.size)} type='text' disabled />
 				</div>
 			)}
-		</div>
+		</div> */}
+		<DataPanel 
+			spanData={napData} 
+			units={myUnit} 
+			range={myRange}
+			updateData={setNap} />
 		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
 		</>
 	)
