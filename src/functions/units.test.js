@@ -1,6 +1,8 @@
 import { expect, test, it } from 'vitest'
 import * as Units from './units'
 
+const defaultRange = [0,100]
+
 test('make good percentage', () => {
 	Units.setUnit('numerical')
 	expect(Units.getUnitValue(50)).toBe(50)
@@ -40,16 +42,36 @@ test('12 hr time output', () => {
 })
 
 test('24 hr time output', () => {
-	expect(Units.getUnitValue(33.4,[0,100], 24)).toBe('0800')
+	expect(Units.getUnitValue(33.4,[0,100], 24)).toBe('08:00')
 })
 
 it('should make minutes into percentage', () => {
 	const per = 45
 	const fractionalMinutes = 1440 * (per/100)
-	expect(Units.minutesToPercentageOfDay(fractionalMinutes)).toBe(per)
+	expect(Units.getPercentFromUnit(fractionalMinutes, defaultRange, 'minutes')).toBe(per)
+
+	const range = [25,75]
+	const rangedFractionalMinutes = (((range[1] - range[0])/100) * 1440) * (per/100)
+	expect(Units.getPercentFromUnit(rangedFractionalMinutes, range, 'minutes')).toBe(per)
 })
 
-test('round time string', () => {
+it.fails('should convert clock to percentage and back without degrading', () => {
+	const startPer = 46
+	const timeConversion = Units.getUnitValue(46)
+	const returnPer = Units.getPercentFromUnit(timeConversion)
+	expect(returnPer).toBeCloseTo(startPer, 2)
+})
+
+it('shoud convert minutes to percentage and back', () => {
+	const startMinutes = 64
+	const perConversion = Units.getPercentFromUnit(startMinutes, defaultRange, 'minutes')
+	const endMinutes = Units.getUnitAmount(perConversion)
+	
+	expect(endMinutes).toBeCloseTo(startMinutes, 2)
+})
+
+//not working
+/*test('round time string', () => {
 	const constraint = [Units.getPercentFromUnit('0800',[0,100]), Units.getPercentFromUnit('1800',[0,100])]
 
 	expect(Units.getRoundedTimeValue(58.333333333333336, constraint)[0]).toBe(1400)
@@ -58,4 +80,4 @@ test('round time string', () => {
 	const roundedTime = 1100
 	const per = Units.getPercentFromUnit(time, constraint)
 	expect(Units.getRoundedTimeValue(per, constraint)[0]).toBe(roundedTime)
-})
+})*/

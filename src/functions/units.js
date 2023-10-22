@@ -33,22 +33,22 @@ export function getUnitAmount(perc, range = rangeStore) {
 	}
 }
 
-export function getPercentFromUnit(val, range = rangeStore) {
+export function getPercentFromUnit(val, range = rangeStore, type = 'clock') {
 	switch (unitStore) {
 		case 'time':
-			return timeToPercentageOfDay(val, range)
+			return (type == 'clock') ? timeToPercentageOfDay(val, range) : minutesToPercentageOfDay(val, range)
 	}
 }
 
 function percentageToNumerical(percentage, range = rangeStore) {
 	percentage = parseFloat(percentage)
-	return ((percentage / 100) * (range[1] - range[0]) + range[0]).toFixed(5)
+	return parseFloat(((percentage / 100) * (range[1] - range[0]) + range[0]).toFixed(2))
 }
 
 function percentageToNumberQuantity(percentage, range = rangeStore) {
 	percentage = parseFloat(percentage)
 	const totalQuantity = range[1] - range[0]
-	return ((percentage / 100) * totalQuantity).toFixed(5)
+	return parseFloat(((percentage / 100) * totalQuantity).toFixed(2))
 }
 
 function percentageOfDayToTime(percentage, range = rangeStore, format = 12) {
@@ -92,7 +92,7 @@ function percentageOfDayToMinutes(percentage, range = rangeStore) {
 		return "Invalid percentage"
 	}
 	const rangedMinutesInDay = (24 * 60) * ((rangeStore[1] - rangeStore[0]) / 100)
-	const rangedMinutes = Math.floor((percentage / 100) * rangedMinutesInDay)
+	const rangedMinutes = Math.round((percentage / 100) * rangedMinutesInDay)
 
 	return rangedMinutes
 }
@@ -101,7 +101,7 @@ function percentageOfDayToMinutes(percentage, range = rangeStore) {
  * given 24 hr time string, return percentage of day
  */
 function timeToPercentageOfDay(time24Hour, range = rangeStore) {
-	time24Hour = time24Hour.replace(':', '')
+	if (typeof time24Hour === 'string') time24Hour = time24Hour.replace(':', '')
 	let numericalTime = parseInt(time24Hour);
 
 	if (!numericalTime || numericalTime < 0 || numericalTime > 2359) {
@@ -120,7 +120,7 @@ function timeToPercentageOfDay(time24Hour, range = rangeStore) {
 	return parseFloat(percentage.toFixed(5))
 }
 
-export function minutesToPercentageOfDay(minutes, range = rangeStore) {
+function minutesToPercentageOfDay(minutes, range = rangeStore) {
 	minutes = parseInt(minutes)
 	const rangedMinutesInDay = 24 * 60 * ((range[1] - range[0]) / 100)
 	const percentage = (minutes / rangedMinutesInDay) * 100

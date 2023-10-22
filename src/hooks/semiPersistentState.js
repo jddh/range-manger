@@ -16,9 +16,8 @@ export default function useSemiPersistentState(key,defaultValue,stripKey) {
 
 function stripProperty(key, state) {
 	state.forEach(n => {
-		for (const p in n) {
-			if (p == key) delete n[p]
-		}
+		if (n[key]) delete n[key]
 	})
+	
 	return state;
 }

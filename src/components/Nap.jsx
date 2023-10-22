@@ -43,6 +43,8 @@ export default forwardRef(function ({className, x , size, containerRect, getCont
 		const rect = getThisRect()
 		if (!rect) return null
 		const leftOffset = -.65	// will increase towards edges of container
+
+		//TODO fix the pixel overshoot
 		const container = getContainerRect()
 		return rect ? {left: (rect.left) - container.left, right: rect.right - container.left, width: rect.width} : null
 	}

@@ -41,7 +41,7 @@ export default function ShiftSchedule({units, children}) {
 	const container = useRef(null)
 	const napEls = useRef(new Array())
 	const [containerRect, setRect] = useState()
-	const [napData, setNapData] = useSemiPersistentState('napData', [])
+	const [napData, setNapData] = useSemiPersistentState('napData', [], 'factive')
 	const [napElLookup, setNapElLookup] = useState([])
 	const [refsconnect, setRefsconnect] = useState(false)
 
@@ -67,7 +67,7 @@ export default function ShiftSchedule({units, children}) {
 	// const myRange = [40,80]
 	const myUnit = 'time'
 	Units.setUnit(myUnit)
-	const myRange = [Units.getPercentFromUnit('1000',[0,100]), Units.getPercentFromUnit('1800',[0,100])]
+	const myRange = [Units.getPercentFromUnit('700',[0,100]), Units.getPercentFromUnit('1800',[0,100])]
 	// const myRange = [0,1000]
 	Units.setRange(myRange)
 
@@ -75,12 +75,19 @@ export default function ShiftSchedule({units, children}) {
 	// console.log(Units.getUnitAmount(20));
 
 	useEffect(function() {
+		//create data from component children
 		setRect(container.current.getBoundingClientRect())
 
 		const ids = 'abcdefghijklmnopq'.split('');
 		const items = Children.map(children, (c, i) => {
-			let formattedChild = {id: ids.shift(), ...c.props}
-			if (napData && napData[i]) formattedChild = {...formattedChild, ...napData[i]}
+			let formattedChild = {
+				id: ids.shift(), 
+				...c.props,
+				x: parseInt(c.props.x),
+				size: parseInt(c.props.size),
+				}
+
+			if (napData && napData[i]) formattedChild = {...formattedChild, ...napData[i], factive: false}
 			return formattedChild
 		})
 
@@ -152,8 +159,8 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function testButton(e) {
-		// clearCache()
-		console.log(napElLookup);
+		clearCache()
+		// console.log(napElLookup);
 	}
 
 	function handleNapDown(e, clickedEl, id) { 
@@ -224,6 +231,8 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function isCollision(mouseX) {
+		//TODO resizing next to a boundary fails
+		//TODO overshoot cancels side upping
 		const rect = createAggregateDimensions(movingEls)
 		const mouseIntent = mouseX - currentMouseX	// +1 for right
 		if (rect.right + mouseIntent >= boundingRect.right && mouseIntent > 0 
@@ -298,19 +307,10 @@ export default function ShiftSchedule({units, children}) {
 			{/* <Gradiation count={6} units="time" range={myRange} /> */}
 			<GradiationBee  value="1100" units={myUnit} range={myRange}/>
 			<GradiationBee  value="1300" units={myUnit} range={myRange}/>
-			<GradiationBee  value="1600" units={myUnit} range={myRange}/>
+			<GradiationBee  value="1500" units={myUnit} range={myRange}/>
+			<GradiationBee  value="1700" units={myUnit} range={myRange}/>
 		</div>
 		<div className="thumb ui" onMouseDown={handleMoveAllDown} onTouchStart={handleMoveAllDown}>move all</div>
-		{/* <div className="data-panels">
-			{napData.map((child, index) => 
-				<div className="data-panel" key={child.id}>
-					<h4>Span {index+1}</h4>
-					<label >start </label><input className='output' value={Units.getUnitValue(child.x)} onChange={() => handleFieldChange(e, child)} type='text' disabled />
-					<label>length </label><input className='output' type="text" value={Units.getUnitAmount(child.size)} disabled/>
-					<label > end </label><input className='output' value={Units.getUnitValue(child.x + child.size)} type='text' disabled />
-				</div>
-			)}
-		</div> */}
 		<DataPanel 
 			spanData={napData} 
 			units={myUnit} 

@@ -92,6 +92,10 @@ body {
 	.data-panel {
 		flex: 1;
 
+		& h4 {
+			margin-bottom: .3em;
+		}
+
 		& input {
 			max-width: 8em;
 
