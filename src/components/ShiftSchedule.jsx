@@ -52,15 +52,16 @@ export default function ShiftSchedule({units, children}) {
 	let currentMouseX, 			//last mouse x pos
 	movingOffset, 				//middle position of moving els
 	currentContainerRect, 		//rect of nap holder
+	boundingRect, 				//boundary rect for movingEls
 	movingEls, 					//array of moving els
 	movingRect,					//aggregate moving object
-	movingOffsets,				//array of mouse pos offsets
-	boundingRect, 				//boundary rect for movingEls
+	movingOffsets,				//array of mouse pos offsets relative to moving els
 	activeIDs,					//array of nap ids moving
 	resizeEl, 					//el being resized
 	resizeStartWidth,			//width before resize
 	resizeStartX,				//mouse x before resize
 	reverseResize,				//reverse resize from left
+	initClientX,
 	lastActionTimeStamp 
 
 	//set time range of container
@@ -175,24 +176,31 @@ export default function ShiftSchedule({units, children}) {
 		activeIDs = [id]
 		lastActionTimeStamp = new Date().getTime()
 		setNap({factive: true}, id)
+		initClientX = getClientX(e)
 
 		//activate drag handler
 		if (e.touches) handleTouchDrag(moveNapIntent, releaseNap)
 		else handleClickDrag(moveNapIntent, releaseNap)
 	}
 
-	function releaseNap() {
+	function releaseNap(e) {
 		let napsToUpdate = []
+		//if cursor has actually moved
+		if (e.clientX != initClientX) {
 		activeIDs.forEach(id => {
 			const bounds = getNapRef(id).getBounds()
 			const left = getPerc(bounds.left, currentContainerRect.width)
 			const width = getPerc(bounds.width, currentContainerRect.width)
 			napsToUpdate.push([{x: left, size: width}, id])
-		})
+		}) }
+		else {
+			napsToUpdate = activeIDs.map(id => [{factive: false}, id])
+		}
 		setNaps(napsToUpdate)
 	}
 
 	function handleMoveAllDown(e) {
+		initClientX = getClientX(e)
 		movingEls = napData.map(({id}) => getNapRef(id).el)
 		activeIDs = napData.map(nd => nd.id)
 		createTravelBounds(movingEls)
@@ -206,6 +214,7 @@ export default function ShiftSchedule({units, children}) {
 
 	function handleNapResizeDown(e, clickedEl, reverse = false, id) {
 		let clientX = getClientX(e)
+		initClientX = getClientX(e)
 		createTravelBounds([clickedEl])
 		movingEls = [clickedEl]
 		activeIDs = [id]
@@ -231,29 +240,33 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function isCollision(mouseX) {
-		//TODO resizing next to a boundary fails
 		//TODO overshoot cancels side upping
 		const rect = createAggregateDimensions(movingEls)
 		const mouseIntent = mouseX - currentMouseX	// +1 for right
-		if (rect.right + mouseIntent >= boundingRect.right && mouseIntent > 0 
-			|| rect.left + mouseIntent <= boundingRect.left && mouseIntent < 0)
-			return true
+		if (rect.right + mouseIntent >= boundingRect.right && mouseIntent > 0)
+			return 'right';
+		if(rect.left + mouseIntent <= boundingRect.left && mouseIntent < 0)
+			return 'left'
 		else return false
 	}
 
 	function snapToBounds(mouseX) {
 		const direction = (mouseX - currentMouseX > 0) ? 'right': 'left'
 		const rect = createAggregateDimensions(movingEls)
-		const distance = rect.left - boundingRect.left
-		movingEls.forEach(me => moveElement(me, (rect.left - distance)))
+		const width = rect.right - rect.left
+		const snapX = (direction == 'left') ? 
+			boundingRect.left - currentContainerRect.left :
+			boundingRect.right - width - currentContainerRect.left
+		const distance = movingEls[0].getBoundingClientRect().left - snapX;
+		movingEls.forEach(me => moveElement(me, snapX))
 	}
 
 	function moveNapIntent(e) {
 		let clientX = getClientX(e)
-		if (isCollision(clientX)) return
-		// {snapToBounds(clientX); return}
+		if (isCollision(clientX)) 
+		{snapToBounds(clientX); return}
 		currentMouseX = clientX
-		movingEls.forEach((me, i) =>{
+		movingEls.forEach((me, i) => {
 			const mouseX = clientX - currentContainerRect.left - movingOffsets[i]
 			moveElement(me, mouseX)
 		})
@@ -263,7 +276,9 @@ export default function ShiftSchedule({units, children}) {
 		let clientX = getClientX(e)
 		let delta = clientX - resizeStartX
 		if (reverseResize) delta *= -1
-		if (isCollision(clientX)) return
+		const collide = isCollision(clientX)
+		if ((collide == 'left' && reverseResize)
+			|| (collide == 'right' && !reverseResize)) return
 		const reverseMotion = reverseResize ? clientX - currentMouseX : false
 		currentMouseX = clientX
 

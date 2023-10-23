@@ -8,7 +8,7 @@ export default function handleClickDrag(dragFn, upFn) {
 }
 
 function release(e) {
-	if (upHandler) upHandler()
+	if (upHandler) upHandler(e)
 	window.removeEventListener('mousemove', dragHandler)
 	window.removeEventListener('mouseup', release)
 }
