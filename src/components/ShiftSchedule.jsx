@@ -186,6 +186,7 @@ export default function ShiftSchedule({units, children}) {
 	function releaseNap(e) {
 		let napsToUpdate = []
 		//if cursor has actually moved
+		//TODO touch needs a bigger null zone
 		if (e.clientX != initClientX) {
 		activeIDs.forEach(id => {
 			const bounds = getNapRef(id).getBounds()
@@ -240,7 +241,6 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function isCollision(mouseX) {
-		//TODO overshoot cancels side upping
 		const rect = createAggregateDimensions(movingEls)
 		const mouseIntent = mouseX - currentMouseX	// +1 for right
 		if (rect.right + mouseIntent >= boundingRect.right && mouseIntent > 0)
@@ -254,11 +254,18 @@ export default function ShiftSchedule({units, children}) {
 		const direction = (mouseX - currentMouseX > 0) ? 'right': 'left'
 		const rect = createAggregateDimensions(movingEls)
 		const width = rect.right - rect.left
-		const snapX = (direction == 'left') ? 
-			boundingRect.left - currentContainerRect.left :
-			boundingRect.right - width - currentContainerRect.left
-		const distance = movingEls[0].getBoundingClientRect().left - snapX;
-		movingEls.forEach(me => moveElement(me, snapX))
+		const distance = (direction == 'left') ? 
+			rect.left - boundingRect.left :
+			boundingRect.right - rect.right
+			// console.log(distance);
+		if (distance < 2) return
+		movingEls.forEach(me => {
+			const meRect = getRect(me)
+			const snapX = (direction == 'left') ?
+				meRect.left - distance - currentContainerRect.left :
+				meRect.left + distance - currentContainerRect.left
+			moveElement(me, snapX)
+		})
 	}
 
 	function moveNapIntent(e) {

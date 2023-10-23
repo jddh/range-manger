@@ -8,7 +8,7 @@ export default function handleTouchDrag(dragFn, upFn) {
 }
 
 function release(e) {
-	if (upHandler) upHandler()
+	if (upHandler) upHandler(e)
 	window.removeEventListener('touchmove', dragHandler)
 	window.removeEventListener('touchend', release)
 }
