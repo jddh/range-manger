@@ -12,11 +12,22 @@ function App() {
 					className="first"
 					x="0"
 					size="10"
+					fixed="left"
 				/>
 				<Nap 
 					className="second"
 					x="40"
 					size="10"
+				/>
+				<Nap 
+					className="second"
+					x="60"
+					size="10"
+				/>
+				<Nap
+					x="90"
+					size="10"
+					fixed="right"
 				/>
 			</ShiftSchedule>
 		</>

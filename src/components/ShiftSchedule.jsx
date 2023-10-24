@@ -6,7 +6,7 @@ import DataPanel from './DataPanel'
 import useSemiPersistentState from '../hooks/semiPersistentState'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
-import {createBounds, getRect, createAggregateDimensions} from '../functions/geometry'
+import {createBounds, getRect, createAggregateDimensions, gridSnap} from '../functions/geometry'
 import * as Units from '../functions/units'
 import './ShiftSchedule.css'
 
@@ -68,7 +68,7 @@ export default function ShiftSchedule({units, children}) {
 	// const myRange = [40,80]
 	const myUnit = 'time'
 	Units.setUnit(myUnit)
-	const myRange = [Units.getPercentFromUnit('700',[0,100]), Units.getPercentFromUnit('1800',[0,100])]
+	const myRange = [Units.getPercentFromUnit('700',[0,100]), Units.getPercentFromUnit('2100',[0,100])]
 	// const myRange = [0,1000]
 	Units.setRange(myRange)
 
@@ -101,6 +101,10 @@ export default function ShiftSchedule({units, children}) {
 
 	function pxToCq(px, container = containerRect.width) {
 		return getPerc(px, container) + 'cqi'
+	}
+
+	function pxToPer(px, container = containerRect.width, suffix = '%') {
+		return gridSnap(getPerc(px, container)) + suffix
 	}
 
 	/**
@@ -187,7 +191,7 @@ export default function ShiftSchedule({units, children}) {
 		let napsToUpdate = []
 		//if cursor has actually moved
 		//TODO touch needs a bigger null zone
-		if (e.clientX != initClientX) {
+		if (e.clientX ) {
 		activeIDs.forEach(id => {
 			const bounds = getNapRef(id).getBounds()
 			const left = getPerc(bounds.left, currentContainerRect.width)
@@ -294,16 +298,19 @@ export default function ShiftSchedule({units, children}) {
 	
 	function moveElement(el, x) {
 		if (!el) return
-		el.style.left = pxToCq(x, currentContainerRect.width)
+		el.style.left = pxToPer(x, currentContainerRect.width)
 	}
 
 	function resizeElement(el, x, reverse) {
 		if (!el) return
 		// el.style.width = x + 'px'
-		el.style.width = pxToCq(x, currentContainerRect.width)
+		const currentWidth = parseInt(el.style.width)
+		const newWidth = pxToPer(x, currentContainerRect.width, '')
+		const delta = newWidth - currentWidth
+		el.style.width = currentWidth + delta + '%'
 		if (reverse) {
 			// el.style.left = parseInt(el.style.left) + reverse + 'px'
-			el.style.left = parseFloat(el.style.left) + getPerc(reverse, currentContainerRect.width) + 'cqi'
+			el.style.left = parseInt(el.style.left) - delta + '%'
 		}
 	}
 
@@ -312,6 +319,7 @@ export default function ShiftSchedule({units, children}) {
 		<div className="shifts ui" ref={container}>
 			{napData.map((child, index) => 
 				<Nap 
+					fixed={child.fixed}
 					containerRect={containerRect} 
 					getContainerRect={() => getRect(container.current)} 
 					mover={moveElement} 

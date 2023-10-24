@@ -21,6 +21,7 @@ export default function DataPanel ({spanData, units, range, updateData}) {
 		const child = spanData[index]
 		const sibling =  spanData[index + 1]
 		const distance = Units.getPercentFromUnit(e.target.value, range, 'minutes')
+		//TODO if sibling is fixed, change length, not position
 		const newX = (child.x + child.size) + distance
 		updateData({x: newX}, sibling.id)
 	}

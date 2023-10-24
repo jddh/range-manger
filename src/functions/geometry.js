@@ -41,3 +41,7 @@ const sortAsc = (a,b) => a-b
 export function getRect(el) {
 	return el.getBoundingClientRect()
 }
+
+export function gridSnap(x) {
+	return Math.round(x)
+}
