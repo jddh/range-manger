@@ -45,7 +45,6 @@ export default forwardRef(function ({fixed, className, x , size, containerRect, 
 		if (!rect) return null
 		const leftOffset = -.65	// will increase towards edges of container
 
-		//TODO fix the pixel overshoot
 		const container = getContainerRect()
 		return rect ? {left: (rect.left) - container.left, right: rect.right - container.left, width: rect.width} : null
 	}
@@ -95,8 +94,8 @@ export default forwardRef(function ({fixed, className, x , size, containerRect, 
 				<ResizeHandle downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} id={id} reverse/>
 			}
 			<div  
-				onMouseDown={movableBody && handleDown}
-				onTouchStart={movableBody && handleDown}
+				onMouseDown={movableBody ? handleDown : null}
+				onTouchStart={movableBody ? handleDown : null}
 				className='body'>
 			</div>
 

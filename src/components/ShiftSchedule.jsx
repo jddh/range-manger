@@ -78,6 +78,7 @@ export default function ShiftSchedule({units, children}) {
 	useEffect(function() {
 		//create data from component children
 		setRect(container.current.getBoundingClientRect())
+		if (napData.length) return
 
 		const ids = 'abcdefghijklmnopq'.split('');
 		const items = Children.map(children, (c, i) => {
@@ -143,7 +144,7 @@ export default function ShiftSchedule({units, children}) {
 	}
 
 	function setNap(props, id) {
-		const ix = napData.findIndex((e) => e.id == id);
+		const ix = napData.findIndex((e) => e.id == id)
 		let data = [...napData]
 		data[ix] = {...data[ix], ...props}
 		setNapData(data)
@@ -156,10 +157,17 @@ export default function ShiftSchedule({units, children}) {
 	function setNaps(naps) {
 		let data = [...napData]
 		naps.forEach(([props, id]) => {
-			const ix = data.findIndex((e) => e.id == id);
+			const ix = data.findIndex((e) => e.id == id)
 			data[ix] = {...data[ix], ...props}
 		})
 		
+		setNapData(data)
+	}
+
+	function removeNap(id) {
+		let data = [...napData]
+		const ix = data.findIndex((e) => e.id == id)
+		data.splice(ix, 1)
 		setNapData(data)
 	}
 
@@ -206,8 +214,9 @@ export default function ShiftSchedule({units, children}) {
 
 	function handleMoveAllDown(e) {
 		initClientX = getClientX(e)
-		movingEls = napData.map(({id}) => getNapRef(id).el)
-		activeIDs = napData.map(nd => nd.id)
+		movingEls = napData.map(({id, fixed}) => !fixed ? getNapRef(id).el : null
+		).filter(el => el)
+		activeIDs = napData.map(({id, fixed}) => !fixed ? id : null).filter(id => id)
 		createTravelBounds(movingEls)
 		currentContainerRect = getRect(container.current)
 		movingOffsets = getOffsets(movingEls, e)
@@ -304,13 +313,13 @@ export default function ShiftSchedule({units, children}) {
 	function resizeElement(el, x, reverse) {
 		if (!el) return
 		// el.style.width = x + 'px'
-		const currentWidth = parseInt(el.style.width)
+		const currentWidth = parseFloat(el.style.width)
 		const newWidth = pxToPer(x, currentContainerRect.width, '')
 		const delta = newWidth - currentWidth
 		el.style.width = currentWidth + delta + '%'
 		if (reverse) {
 			// el.style.left = parseInt(el.style.left) + reverse + 'px'
-			el.style.left = parseInt(el.style.left) - delta + '%'
+			el.style.left = parseFloat(el.style.left) - delta + '%'
 		}
 	}
 
@@ -345,7 +354,8 @@ export default function ShiftSchedule({units, children}) {
 			spanData={napData} 
 			units={myUnit} 
 			range={myRange}
-			updateData={setNap} />
+			updateData={setNap}
+			deleteData={removeNap} />
 		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
 		</>
 	)
