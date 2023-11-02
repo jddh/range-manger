@@ -5,6 +5,7 @@ import * as Units from '../functions/units'
 import { gridSnap } from '../functions/geometry'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
+import { hexToRgb } from '../functions/utilities'
 
 function getPerc(px, total, style = '') {
 	let perc = px / total
@@ -82,6 +83,12 @@ export default forwardRef(function ({fixed, className, x , size, containerRect, 
 		downHandler(e, element.current, id)
 	}
 
+	function handleColourChange(value) {
+		//need to have it in numerical rbg format w/o brackets
+		if (!value) return
+		element.style.setProperty('--base-bg-color', value)
+	}
+
 	const leftHandle = fixed != 'left' && fixed != 'both'
 	const rightHandle = fixed != 'right' && fixed != 'both'
 	const movableBody = !fixed
@@ -100,7 +107,7 @@ export default forwardRef(function ({fixed, className, x , size, containerRect, 
 			</div>
 
 			{rightHandle &&
-				<ResizeHandle containerRect={containerRect} downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} id={id} />
+				<ResizeHandle containerRect={containerRect} downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} className="last" id={id} />
 			}
 
 			<div className="active-label left">{currentBounds && currentBounds.left}{dynamicBounds && dynamicBounds.left}</div>

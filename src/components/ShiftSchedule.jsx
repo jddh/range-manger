@@ -1,4 +1,5 @@
-import { useRef, useState, useEffect, Children, cloneElement } from 'react'
+import { useRef, useState, useEffect, Children, cloneElement, useMemo } from 'react'
+import ShortUniqueId from 'short-unique-id';
 import Nap from './Nap'
 import Gradiation from './Gradiation'
 import GradiationBee from './GradiationBee'
@@ -36,6 +37,8 @@ function getPerc(px, total, style = '') {
 	}
 	return perc
 }
+
+const uid = new ShortUniqueId({ length: 10 })
 
 export default function ShiftSchedule({units, children}) {
 	const container = useRef(null)
@@ -78,12 +81,15 @@ export default function ShiftSchedule({units, children}) {
 	useEffect(function() {
 		//create data from component children
 		setRect(container.current.getBoundingClientRect())
-		if (napData.length) return
+		if (napData.length) {
+			updateRefs()
+			return
+		}
 
 		const ids = 'abcdefghijklmnopq'.split('');
 		const items = Children.map(children, (c, i) => {
 			let formattedChild = {
-				id: ids.shift(), 
+				id: uid.rnd(), 
 				...c.props,
 				x: parseInt(c.props.x),
 				size: parseInt(c.props.size),
@@ -162,6 +168,17 @@ export default function ShiftSchedule({units, children}) {
 		})
 		
 		setNapData(data)
+	}
+
+	//TODO data panels are listed by order of data, which ends up not syncing with order of elements
+	function addNap({x, size = 10, fixed}) {
+		let naps = napData.toSorted((a,b) => {
+			return (a.x+a.size > b.x+b.size) ? -1 : 1
+		})
+		naps = naps.filter(n => n.x + n.size < 90)
+		if (!x) x = naps[0].x + naps[0].size + 5
+		setNapData([...napData, {x: x, size: size, fixed: fixed, id: uid.rnd()}])
+		// console.log(naps);
 	}
 
 	function removeNap(id) {
@@ -355,7 +372,8 @@ export default function ShiftSchedule({units, children}) {
 			units={myUnit} 
 			range={myRange}
 			updateData={setNap}
-			deleteData={removeNap} />
+			deleteData={removeNap}
+			newSpan={addNap} />
 		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
 		</>
 	)

@@ -1,6 +1,7 @@
 import {useRef} from 'react'
+import classNames from 'classnames'
 
-export default function ResizeHandle({downHandler, parent, reverse, id}) {
+export default function ResizeHandle({downHandler, parent, reverse, className, id}) {
 	const element = useRef(null)
 
 	function handleDown(e) {
@@ -11,7 +12,7 @@ export default function ResizeHandle({downHandler, parent, reverse, id}) {
 		<div ref={element}
 			onMouseDown={handleDown}
 			onTouchStart={handleDown}
-			className="resize-handle"
+			className={classNames(className, 'resize-handle')}
 		/>
 	)
 }

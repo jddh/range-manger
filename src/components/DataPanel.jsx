@@ -4,7 +4,7 @@ function handleFieldChange(e, child) {
 	console.log(e.target.value, child)
 }
 
-export default function DataPanel ({spanData, units, range, updateData, deleteData}) {
+export default function DataPanel ({spanData, units, range, updateData, deleteData, newSpan}) {
 	Units.setUnit(units)
 	Units.setRange(range)
 
@@ -43,6 +43,10 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 		deleteData(id)
 	}
 
+	function handleColourChange(e) {
+		console.log(e.target.value);
+	}
+
 	//render
 	let intervals = []	//if given child has a sibling, show interval field
 	spanData.forEach((child, index) => {
@@ -59,26 +63,40 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 				<div className="data-panel" key={child.id}>
 					<h4>Span {index+1}</h4>
 
-					<button className="rm" onClick={() => handleRemove(child.id)}>remove</button>
+					<button className="rm" onClick={() => handleRemove(child.id)}>x</button>
 
-					<label >start </label><input className='output' value={Units.getUnitValue(child.x,range,24)} onChange={e => handleStartChange(e, child)} type={unitFieldType} step={unitStep}  />
+					<fieldset>
+						<label >start </label>
+						<input className='output' value={Units.getUnitValue(child.x,range,24)} onChange={e => handleStartChange(e, child)} type={unitFieldType} step={unitStep}  />
+					</fieldset>
 
-					<label>length </label><input className='output' type="number" step={unitStep} value={Units.getUnitAmount(child.size)} onChange={e => handleLengthChange(e, child)} />
+					<fieldset><label>length </label><input className='output' type="number" step={unitStep} value={Units.getUnitAmount(child.size)} onChange={e => handleLengthChange(e, child)} /></fieldset>
 
-					<label > end </label><input className='output' value={Units.getUnitValue(child.x + child.size)} type='text' disabled />
+					<fieldset><label > end </label><input className='output' value={Units.getUnitValue(child.x + child.size)} type='text' disabled /></fieldset>
 
 					{intervals[index] && 
-						<>
+						<fieldset>
 						<label > interval </label><input className='output' value={Units.getUnitAmount((spanData[index+1].x) - (child.x + child.size))} onChange={e => handleIntervalChange(e, index)} type="number" />
-						</>}
+						</fieldset>}
 
-					<select name="" id="" onChange={e => handleFixedChange(e, child)}>
-						{fixedValues.map((fv, i) => 
-							<option value={fv} selected={fv == child.fixed}>{fixedLabels[i]}</option>
-						)}
-					</select>
+					<fieldset>
+						<label>fixed </label>
+						<select name="" id="" defaultValue={child.fixed} onChange={e => handleFixedChange(e, child)}>
+							{fixedValues.map((fv, i) =>
+								<option value={fv}  key={i} >{fixedLabels[i]}</option>
+							)}
+						</select>
+					</fieldset>
+
+					<fieldset>
+						<input type="color" onChange={handleColourChange} />
+					</fieldset>
 				</div>
 			)}
+
+			<div className="meta-controls">
+				<button className="add" onClick={newSpan}>add</button>
+			</div>
 		</div>
 	)
 }
