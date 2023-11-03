@@ -52,6 +52,7 @@ const defaultNapProps = {color: '#96D3FF'}
 
 export default function ShiftSchedule({
 		disableTouchDrag = true,
+		maxItems = 5,
 		units, 
 		children
 	}) {
@@ -189,8 +190,6 @@ export default function ShiftSchedule({
 		setNapData(data)
 	}
 
-	//TODO establish limit
-	//TODO create some component defaults
 	function addNap({x, size = 10, fixed}) {
 
 		//pick largest gap
@@ -319,28 +318,30 @@ export default function ShiftSchedule({
 		else return false
 	}
 
-	function snapToBounds(mouseX) {
+	function snapToBounds(mouseX, action = 'move') {
 		const direction = (mouseX - currentMouseX > 0) ? 'right': 'left'
 		const rect = createAggregateDimensions(movingEls)
 		const width = rect.right - rect.left
 		const distance = (direction == 'left') ? 
 			rect.left - boundingRect.left :
 			boundingRect.right - rect.right
-			// console.log(distance);
 		if (distance < 2) return
 		movingEls.forEach(me => {
 			const meRect = getRect(me)
 			const snapX = (direction == 'left') ?
 				meRect.left - distance - currentContainerRect.left :
 				meRect.left + distance - currentContainerRect.left
-			moveElement(me, snapX)
+			const snapSize = meRect.width + distance
+			if (action == 'resize')
+				resizeElement(me, snapSize, (direction == 'left') && true)
+			else moveElement(me, snapX)
 		})
 	}
 
 	function moveNapIntent(e) {
 		let clientX = getClientX(e)
 		if (isCollision(clientX)) 
-		{snapToBounds(clientX); return}
+			{snapToBounds(clientX); return}
 		currentMouseX = clientX
 		movingEls.forEach((me, i) => {
 			const mouseX = clientX - currentContainerRect.left - movingOffsets[i]
@@ -348,14 +349,16 @@ export default function ShiftSchedule({
 		})
 	}
 
-	//TODO snap collision not working on resize
 	function resizeNapIntent(e) {
 		let clientX = getClientX(e)
 		let delta = clientX - resizeStartX
 		if (reverseResize) delta *= -1
 		const collide = isCollision(clientX)
 		if ((collide == 'left' && reverseResize)
-			|| (collide == 'right' && !reverseResize)) return
+			|| (collide == 'right' && !reverseResize)) {
+			snapToBounds(clientX, 'resize')
+			return
+		}
 		const reverseMotion = reverseResize ? clientX - currentMouseX : false
 		currentMouseX = clientX
 
@@ -413,7 +416,8 @@ export default function ShiftSchedule({
 			range={myRange}
 			updateData={setNap}
 			deleteData={removeNap}
-			newSpan={addNap} />
+			newSpan={addNap}
+			maxItems={maxItems} />
 		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
 		</>
 	)

@@ -1,6 +1,6 @@
 import * as Units from '../functions/units'
 
-export default function DataPanel ({spanData, units, range, updateData, deleteData, newSpan}) {
+export default function DataPanel ({spanData, units, range, updateData, deleteData, newSpan, maxItems}) {
 	Units.setUnit(units)
 	Units.setRange(range)
 
@@ -94,7 +94,7 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 			)}
 
 			<div className="meta-controls">
-				<button className="add" onClick={newSpan}>add</button>
+				<button className="add" disabled={spanData.length >= maxItems} onClick={newSpan}>add</button>
 			</div>
 		</div>
 	)

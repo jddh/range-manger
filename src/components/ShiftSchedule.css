@@ -60,7 +60,6 @@ body {
 		z-index: 3;
 		left: -50px;
 		top: 40%;
-		/* TODO empty labels show up as blank boxes */
 		padding: 2px 5px;
 		font-size: .7em;
 		background-color: #4A4A4A;
@@ -78,6 +77,7 @@ body {
 
 	&.active {
 		background-color: rgba(var(--base-bg-color), .7);
+		z-index: 3;
 
 		.active-label {
 			display: block;
