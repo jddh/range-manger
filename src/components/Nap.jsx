@@ -35,18 +35,15 @@ export default forwardRef(function (
 	Units.setRange(timeRange)
 
 	let currentOffset = parseInt(size) / 2
-	// let currentContainerRect = getContainerRect()
 	const adjustedX = x
 
-	function getSize() {
-		return element.current?.clientWidth
-	}
-	function getOffset() {
-		return (getSize() / 2)
-	}
 	function getThisRect() {
 		return element.current?.getBoundingClientRect()
 	}
+
+	/**
+	 * bounds relative to container
+	 */
 	function getBounds() {
 		const rect = getThisRect()
 		if (!rect) return null
@@ -86,16 +83,6 @@ export default forwardRef(function (
 
 	function handleDown(e) {
 		downHandler(e, element.current, id)
-	}
-	
-	function handleTouch(e) {
-		downHandler(e, element.current, id)
-	}
-
-	function handleColourChange(value) {
-		//need to have it in numerical rbg format w/o brackets
-		if (!value) return
-		element.style.setProperty('--base-bg-color', value)
 	}
 
 	const leftHandle = fixed != 'left' && fixed != 'both'

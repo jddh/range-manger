@@ -5,7 +5,7 @@
  * @param {HTMLElement} container 
  * @returns {object} {left,right}
  */
-export function createBounds(inactiveElements, activeElements, container) {
+export function createLimits(inactiveElements, activeElements, container) {
 	let boundsRect
 	const boundsOverlap = 10	//safety if active elements overlap
 

@@ -8,7 +8,7 @@ import DataPanel from './DataPanel'
 import useSemiPersistentState from '../hooks/semiPersistentState'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
-import {createBounds, getRect, createAggregateDimensions, gridSnap} from '../functions/geometry'
+import {createLimits, getRect, createAggregateDimensions, gridSnap} from '../functions/geometry'
 import * as Units from '../functions/units'
 import { hexToRgb } from '../functions/utilities'
 import './ShiftSchedule.css'
@@ -69,14 +69,12 @@ export default function ShiftSchedule({
 
 	//memory vars for event handlers
 	let currentMouseX, 			//last mouse x pos
-	movingOffset, 				//middle position of moving els
 	currentContainerRect, 		//rect of nap holder
-	boundingRect, 				//boundary rect for movingEls
+	limitRect, 					//limit rect for movingEls
 	movingEls, 					//array of moving els
 	movingRect,					//aggregate moving object
 	movingOffsets,				//array of mouse pos offsets relative to moving els
 	activeIDs,					//array of nap ids moving
-	resizeEl, 					//el being resized
 	resizeStartWidth,			//width before resize
 	resizeStartX,				//mouse x before resize
 	reverseResize,				//reverse resize from left
@@ -229,8 +227,8 @@ export default function ShiftSchedule({
 	}
 
 	function handleNapDown(e, clickedEl, id) { 
-		//create dynamic bounding box
-		createTravelBounds([clickedEl])
+		//create dynamic limit box
+		createTravelLimits([clickedEl])
 
 		//register responsive boundaries
 		currentContainerRect = getRect(container.current)
@@ -272,7 +270,7 @@ export default function ShiftSchedule({
 		movingEls = napData.map(({id, fixed}) => !fixed ? getNapRef(id).el : null
 		).filter(el => el)
 		activeIDs = napData.map(({id, fixed}) => !fixed ? id : null).filter(id => id)
-		createTravelBounds(movingEls)
+		createTravelLimits(movingEls)
 		currentContainerRect = getRect(container.current)
 		movingOffsets = getOffsets(movingEls, e)
 		setNaps(napData.map(nd => [{factive: true}, nd.id]))
@@ -284,7 +282,7 @@ export default function ShiftSchedule({
 	function handleNapResizeDown(e, clickedEl, reverse = false, id) {
 		let clientX = getClientX(e)
 		initClientX = getClientX(e)
-		createTravelBounds([clickedEl])
+		createTravelLimits([clickedEl])
 		movingEls = [clickedEl]
 		activeIDs = [id]
 		reverseResize = reverse
@@ -299,32 +297,32 @@ export default function ShiftSchedule({
 	}
 
 	/**
-	 * calculate dynamic left & right bounds based on container and/or adjacent elements
+	 * calculate dynamic left & right limits based on container and/or adjacent elements
 	 * @param {array} activeEls 
 	 */
-	function createTravelBounds(activeEls) {
+	function createTravelLimits(activeEls) {
 		const otherEls = napElLookup.map(({el}) => el).filter(el => !activeEls.includes(el))
 
-		boundingRect = createBounds(otherEls, activeEls, container.current)
+		limitRect = createLimits(otherEls, activeEls, container.current)
 	}
 
 	function isCollision(mouseX) {
 		const rect = createAggregateDimensions(movingEls)
 		const mouseIntent = mouseX - currentMouseX	// +1 for right
-		if (rect.right + mouseIntent >= boundingRect.right && mouseIntent > 0)
+		if (rect.right + mouseIntent >= limitRect.right && mouseIntent > 0)
 			return 'right';
-		if(rect.left + mouseIntent <= boundingRect.left && mouseIntent < 0)
+		if(rect.left + mouseIntent <= limitRect.left && mouseIntent < 0)
 			return 'left'
 		else return false
 	}
 
-	function snapToBounds(mouseX, action = 'move') {
+	function snapToLimit(mouseX, action = 'move') {
 		const direction = (mouseX - currentMouseX > 0) ? 'right': 'left'
 		const rect = createAggregateDimensions(movingEls)
 		const width = rect.right - rect.left
 		const distance = (direction == 'left') ? 
-			rect.left - boundingRect.left :
-			boundingRect.right - rect.right
+			rect.left - limitRect.left :
+			limitRect.right - rect.right
 		if (distance < 2) return
 		movingEls.forEach(me => {
 			const meRect = getRect(me)
@@ -341,7 +339,7 @@ export default function ShiftSchedule({
 	function moveNapIntent(e) {
 		let clientX = getClientX(e)
 		if (isCollision(clientX)) 
-			{snapToBounds(clientX); return}
+			{snapToLimit(clientX); return}
 		currentMouseX = clientX
 		movingEls.forEach((me, i) => {
 			const mouseX = clientX - currentContainerRect.left - movingOffsets[i]
@@ -356,7 +354,7 @@ export default function ShiftSchedule({
 		const collide = isCollision(clientX)
 		if ((collide == 'left' && reverseResize)
 			|| (collide == 'right' && !reverseResize)) {
-			snapToBounds(clientX, 'resize')
+			snapToLimit(clientX, 'resize')
 			return
 		}
 		const reverseMotion = reverseResize ? clientX - currentMouseX : false
