@@ -1,11 +1,11 @@
-import {forwardRef, useRef, useImperativeHandle, useState} from 'react'
+import {forwardRef, useRef, useImperativeHandle, useState, useMemo} from 'react'
 import classNames from 'classnames'
 import ResizeHandle from './ResizeHandle'
 import * as Units from '../functions/units'
 import { gridSnap } from '../functions/geometry'
 import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
-import { hexToRgb } from '../functions/utilities'
+import { hexToRgb, hexToHSL } from '../functions/utilities'
 
 function getPerc(px, total, style = '') {
 	let perc = px / total
@@ -19,11 +19,17 @@ function getPerc(px, total, style = '') {
 	return perc
 }
 
-export default forwardRef(function ({fixed, className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, id, factive, currentBounds, timeRange, units}, ref) {
+export default forwardRef(function (
+	{
+		fixed, className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, id, factive, currentBounds, timeRange, units, color, name
+	}, ref) {
 	const element = useRef(null)
 	useImperativeHandle(ref, () => ({getBounds: getBounds, el: element.current, id: id}))
 	const [startBound, setStartBound] = useState()
 	const [dynamicBounds, setdynamicBounds] = useState()
+
+	const rgbColour = useMemo(() => hexToRgb(color), [color])
+	const hslColour = useMemo(() => hexToHSL(color, -10), [color])
 
 	Units.setUnit(units)
 	Units.setRange(timeRange)
@@ -54,24 +60,27 @@ export default forwardRef(function ({fixed, className, x , size, containerRect, 
 
 	// timeout-based position tooltip
 	if (factive) {
-		// console.log('active');
-		let currentContainerRect = getContainerRect()
+		var currentContainerRect = getContainerRect()
+		//first run immediately
+		if (!window['step' + id]) updateToolTips()
 		window['step' + id] = setInterval(() => {
-			// console.log(getThisRect().left)
-			const bounds = getBounds()
-			const leftTime = Units.getUnitValue(getPerc(bounds.left, currentContainerRect.width))
-			const rightTime = Units.getUnitValue(getPerc(bounds.right, currentContainerRect.width))
-			const widthTime = Units.getUnitAmount(getPerc(bounds.width, currentContainerRect.width))
-
-			element.current.querySelector('.active-label.left').innerText = leftTime
-			element.current.querySelector('.active-label.size').innerText = widthTime
-			element.current.querySelector('.active-label.right').innerText = rightTime
+			updateToolTips()
 		}, 200)
-
 	}
 	else {
-		// console.log('inactive');
 		clearInterval(window['step' + id])
+	}
+
+	function updateToolTips() {
+		// console.log(getThisRect().left)
+		const bounds = getBounds()
+		const leftTime = Units.getUnitValue(getPerc(bounds.left, currentContainerRect.width))
+		const rightTime = Units.getUnitValue(getPerc(bounds.right, currentContainerRect.width))
+		const widthTime = Units.getUnitAmount(getPerc(bounds.width, currentContainerRect.width))
+
+		element.current.querySelector('.active-label.left').innerText = leftTime
+		element.current.querySelector('.active-label.size').innerText = widthTime
+		element.current.querySelector('.active-label.right').innerText = rightTime
 	}
 	// end tooltip
 
@@ -96,7 +105,13 @@ export default forwardRef(function ({fixed, className, x , size, containerRect, 
 	return (
 		<div ref={element} 
 			className={classNames(className, {active: factive},'nap')} 
-			style={{left: gridSnap(adjustedX) + '%', width: gridSnap(size) + '%'}}>
+			style={{
+				left: gridSnap(adjustedX) + '%', 
+				width: gridSnap(size) + '%',
+				'--base-bg-color': rgbColour,
+				'--base-bg-hsl': hslColour
+			}}>
+			<div className="label">{name}</div>
 			{leftHandle &&
 				<ResizeHandle downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} id={id} reverse/>
 			}

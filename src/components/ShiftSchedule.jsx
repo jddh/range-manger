@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, Children, cloneElement, useMemo } from 'react'
-import ShortUniqueId from 'short-unique-id';
+import ShortUniqueId from 'short-unique-id'
+import classNames from 'classnames'
 import Nap from './Nap'
 import Gradiation from './Gradiation'
 import GradiationBee from './GradiationBee'
@@ -9,6 +10,7 @@ import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
 import {createBounds, getRect, createAggregateDimensions, gridSnap} from '../functions/geometry'
 import * as Units from '../functions/units'
+import { hexToRgb } from '../functions/utilities'
 import './ShiftSchedule.css'
 
 function getOffsets(els, e) {
@@ -38,15 +40,28 @@ function getPerc(px, total, style = '') {
 	return perc
 }
 
+function sortXAsc(array) {
+	return array.sort((a,b) => {
+		return (a.x < b.x) ? -1 : 1
+	})
+}
+
 const uid = new ShortUniqueId({ length: 10 })
 
-export default function ShiftSchedule({units, children}) {
+const defaultNapProps = {color: '#96D3FF'}
+
+export default function ShiftSchedule({
+		disableTouchDrag = true,
+		units, 
+		children
+	}) {
 	const container = useRef(null)
 	const napEls = useRef(new Array())
 	const [containerRect, setRect] = useState()
 	const [napData, setNapData] = useSemiPersistentState('napData', [], 'factive')
 	const [napElLookup, setNapElLookup] = useState([])
 	const [refsconnect, setRefsconnect] = useState(false)
+	const [dragging, setDragging] = useState(false)
 
 	//runtime test
 	// console.log(Units.getUnitValue(getPerc(40,100, '')));
@@ -86,18 +101,21 @@ export default function ShiftSchedule({units, children}) {
 			return
 		}
 
-		const ids = 'abcdefghijklmnopq'.split('');
 		const items = Children.map(children, (c, i) => {
 			let formattedChild = {
 				id: uid.rnd(), 
 				...c.props,
 				x: parseInt(c.props.x),
 				size: parseInt(c.props.size),
+				name: `Span ${i+1}`,
+				...defaultNapProps
 				}
 
 			if (napData && napData[i]) formattedChild = {...formattedChild, ...napData[i], factive: false}
 			return formattedChild
 		})
+
+		sortXAsc(items)
 
 		setNapData(items) 
 	}, [])
@@ -119,14 +137,15 @@ export default function ShiftSchedule({units, children}) {
 	 * @returns 
 	 */
 	function updateRefs() {
-		if (refsconnect) return;
+		if (refsconnect && napElLookup.length == napData.length) return;
+		const validNapEls = napEls.current.filter(e => e)
 		setNapElLookup(
 			napData.map((i) => {
 			  let item = {}
-			  const ix = napEls.current.findIndex((e) => e.id == i.id)
+			  const ix = validNapEls.findIndex(e => e.id == i.id)
 			  item.id = i.id
-			  item.el = napEls.current[ix].el
-			  item.getBounds = napEls.current[ix].getBounds
+			  item.el = validNapEls[ix].el
+			  item.getBounds = validNapEls[ix].getBounds
 			  return item;
 			})
 		);
@@ -170,15 +189,32 @@ export default function ShiftSchedule({units, children}) {
 		setNapData(data)
 	}
 
-	//TODO data panels are listed by order of data, which ends up not syncing with order of elements
+	//TODO establish limit
+	//TODO create some component defaults
 	function addNap({x, size = 10, fixed}) {
-		let naps = napData.toSorted((a,b) => {
-			return (a.x+a.size > b.x+b.size) ? -1 : 1
+
+		//pick largest gap
+		const gaps = napData.map((n,i) => {
+			if (i == 0) return 0
+			return {i: i-1, gap: n.x - (napData[i-1].x + napData[i-1].size)}
+		}).filter(n => n)
+		.sort((a,b) => a.gap < b.gap ? 1 : -1)
+		const gap = gaps[0]
+		x = napData[gap.i].x + napData[gap.i].size + 1
+		if (gap.gap < 10) size = gap.gap - 4
+
+
+		let newNaps = [...napData]
+		newNaps.push({
+			x: x, 
+			size: size, 
+			fixed: fixed, 
+			name: `Span ${napData.length+1}`,
+			id: uid.rnd(),
+			...defaultNapProps
 		})
-		naps = naps.filter(n => n.x + n.size < 90)
-		if (!x) x = naps[0].x + naps[0].size + 5
-		setNapData([...napData, {x: x, size: size, fixed: fixed, id: uid.rnd()}])
-		// console.log(naps);
+		sortXAsc(newNaps)
+		setNapData(newNaps)
 	}
 
 	function removeNap(id) {
@@ -206,6 +242,7 @@ export default function ShiftSchedule({units, children}) {
 		lastActionTimeStamp = new Date().getTime()
 		setNap({factive: true}, id)
 		initClientX = getClientX(e)
+		setDragging(true)
 
 		//activate drag handler
 		if (e.touches) handleTouchDrag(moveNapIntent, releaseNap)
@@ -226,6 +263,8 @@ export default function ShiftSchedule({units, children}) {
 		else {
 			napsToUpdate = activeIDs.map(id => [{factive: false}, id])
 		}
+
+		setDragging(false)
 		setNaps(napsToUpdate)
 	}
 
@@ -309,6 +348,7 @@ export default function ShiftSchedule({units, children}) {
 		})
 	}
 
+	//TODO snap collision not working on resize
 	function resizeNapIntent(e) {
 		let clientX = getClientX(e)
 		let delta = clientX - resizeStartX
@@ -342,7 +382,7 @@ export default function ShiftSchedule({units, children}) {
 
 	return (
 		<>
-		<div className="shifts ui" ref={container}>
+		<div className={classNames({'drag': dragging, 'disable-touch-drag': disableTouchDrag}, 'shifts', 'ui')} ref={container}>
 			{napData.map((child, index) => 
 				<Nap 
 					fixed={child.fixed}

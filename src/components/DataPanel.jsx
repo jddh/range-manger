@@ -1,9 +1,5 @@
 import * as Units from '../functions/units'
 
-function handleFieldChange(e, child) {
-	console.log(e.target.value, child)
-}
-
 export default function DataPanel ({spanData, units, range, updateData, deleteData, newSpan}) {
 	Units.setUnit(units)
 	Units.setRange(range)
@@ -14,7 +10,6 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 	}
 
 	function handleLengthChange(e, spanNode) {
-		console.log(e.target.value);
 		updateData({size: Units.getPercentFromUnit(e.target.value, range, 'minutes')}, spanNode.id)
 	}
 
@@ -43,8 +38,12 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 		deleteData(id)
 	}
 
-	function handleColourChange(e) {
-		console.log(e.target.value);
+	function handleColourChange(e, child) {
+		updateData({color: e.target.value}, child.id)
+	}
+
+	function handleNameChange(e, child) {
+		updateData({name: e.target.value}, child.id)
 	}
 
 	//render
@@ -61,7 +60,7 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 		<div className="data-panels">
 			{spanData.map((child, index) => 
 				<div className="data-panel" key={child.id}>
-					<h4>Span {index+1}</h4>
+					<input type="text" defaultValue={child.name} onBlur={(e) => handleNameChange(e, child)} />
 
 					<button className="rm" onClick={() => handleRemove(child.id)}>x</button>
 
@@ -89,7 +88,7 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 					</fieldset>
 
 					<fieldset>
-						<input type="color" onChange={handleColourChange} />
+						<input type="color" defaultValue={child.color} onChange={(e) => handleColourChange(e, child)} />
 					</fieldset>
 				</div>
 			)}

@@ -9,7 +9,12 @@ body {
 	height: 100px;
 	width: 75vw;
 	margin: 0 auto;
-	border: 1px solid black;
+	border: 1px solid #C0C0C0;
+	background-color: #FAFAFA;
+
+	&.disable-touch-drag {
+		touch-action: none;
+	}
 }
 
 .ui {
@@ -18,6 +23,7 @@ body {
 
 .nap {
 	--base-bg-color: 172, 220, 255;
+	--base-bg-hsl: 0, 0, 0;
 
 	display: flex;
 	box-sizing: border-box;
@@ -38,6 +44,14 @@ body {
 
 	.body {
 		flex: 1;
+	}
+
+	.label {
+		position: absolute;
+		left: 3px;
+		font-size: 11px;
+		/* color: rgba(var(--base-bg-color), 1); */
+		color: hsl(var(--base-bg-hsl));
 	}
 
 	.active-label {
@@ -102,9 +116,22 @@ body {
 	position: absolute;
 	z-index: 1;
 	height: 100%;
-	width: 1px;
-	background-color: lightgrey;
 	color: lightgrey;
+	font-size: 11px;
+
+	& span {
+		position: absolute;
+		top: -1.5em;
+	}
+
+	&:after {
+		content: '';
+		position: absolute;
+		left: 0;
+		height: 100%;
+		width: 1px;
+		background-color: #E2E2E2;
+	}
 }
 
 
