@@ -63,6 +63,7 @@ export default function ShiftSchedule({
 	const [napElLookup, setNapElLookup] = useState([])
 	const [refsconnect, setRefsconnect] = useState(false)
 	const [dragging, setDragging] = useState(false)
+	const [activeInfoWindow, setActiveInfoWindow] = useState(false)
 
 	//runtime test
 	// console.log(Units.getUnitValue(getPerc(40,100, '')));
@@ -381,6 +382,14 @@ export default function ShiftSchedule({
 		}
 	}
 
+	function toggleInfoWindow(id, leftBound) {
+		if ((id && activeInfoWindow && id != activeInfoWindow[0]) || id && !activeInfoWindow)
+			{
+				setActiveInfoWindow([id, leftBound])
+			}
+		else setActiveInfoWindow()
+	}
+
 	return (
 		<>
 		<div className={classNames({'drag': dragging, 'disable-touch-drag': disableTouchDrag}, 'shifts', 'ui')} ref={container}>
@@ -399,6 +408,7 @@ export default function ShiftSchedule({
 					currentBounds={child.currentBounds}
 					timeRange={myRange}
 					units={myUnit}
+					toggleInfoWindow={toggleInfoWindow}
 					{...child} />
 			)}
 			{/* <Gradiation count={6} units="time" range={myRange} /> */}
@@ -415,7 +425,9 @@ export default function ShiftSchedule({
 			updateData={setNap}
 			deleteData={removeNap}
 			newSpan={addNap}
-			maxItems={maxItems} />
+			maxItems={maxItems}
+			activeInfoWindow={activeInfoWindow} 
+			setActiveInfoWindow={setActiveInfoWindow} />
 		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
 		</>
 	)

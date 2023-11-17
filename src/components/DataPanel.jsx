@@ -1,6 +1,7 @@
+import classNames from 'classnames'
 import * as Units from '../functions/units'
 
-export default function DataPanel ({spanData, units, range, updateData, deleteData, newSpan, maxItems}) {
+export default function DataPanel ({spanData, units, range, updateData, deleteData, newSpan, maxItems, activeInfoWindow, setActiveInfoWindow}) {
 	Units.setUnit(units)
 	Units.setRange(range)
 
@@ -34,6 +35,10 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 		updateData({fixed: e.target.value}, spanNode.id)
 	}
 
+	function handleClose() {
+		setActiveInfoWindow(false)
+	}
+
 	function handleRemove(id) {
 		deleteData(id)
 	}
@@ -56,13 +61,23 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 	const fixedLabels = ['No', 'Left', 'Right', 'Both']
 	const fixedValues = ['', 'left', 'right', 'both']
 
+	let showWindow
+	if (activeInfoWindow)
+		showWindow = spanData.map(child => activeInfoWindow[0] == child.id)
+	else showWindow = []
+
 	return (
 		<div className="data-panels">
 			{spanData.map((child, index) => 
-				<div className="data-panel" key={child.id}>
+				<div 
+					className={classNames({active: showWindow[index]}, 'data-panel')} 
+					key={child.id}
+					style={{left: (showWindow[index]) ? activeInfoWindow[1] : 'auto'}}
+				>
+
 					<input type="text" defaultValue={child.name} onBlur={(e) => handleNameChange(e, child)} />
 
-					<button className="rm" onClick={() => handleRemove(child.id)}>x</button>
+					<button className="rm" onClick={handleClose}>x</button>
 
 					<fieldset>
 						<label >start </label>
@@ -89,6 +104,10 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 
 					<fieldset>
 						<input type="color" defaultValue={child.color} onChange={(e) => handleColourChange(e, child)} />
+					</fieldset>
+
+					<fieldset>
+						<button onClick={() => handleRemove(child.id)}>Remove</button>
 					</fieldset>
 				</div>
 			)}

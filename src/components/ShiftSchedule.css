@@ -145,11 +145,18 @@ body {
 }
 
 .data-panels {
+	position: relative;
 	display: flex;
 
 	.data-panel {
 		flex: 1;
 		text-align: left;
+		visibility: hidden;
+
+		&.active {
+			position: absolute;
+			visibility: visible;
+		}
 
 		& h4 {
 			margin-bottom: .3em;

@@ -21,7 +21,7 @@ function getPerc(px, total, style = '') {
 
 export default forwardRef(function (
 	{
-		fixed, className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, id, factive, currentBounds, timeRange, units, color, name
+		fixed, className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, id, factive, currentBounds, timeRange, units, color, name, toggleInfoWindow
 	}, ref) {
 	const element = useRef(null)
 	useImperativeHandle(ref, () => ({getBounds: getBounds, el: element.current, id: id}))
@@ -34,7 +34,6 @@ export default forwardRef(function (
 	Units.setUnit(units)
 	Units.setRange(timeRange)
 
-	let currentOffset = parseInt(size) / 2
 	const adjustedX = x
 
 	function getThisRect() {
@@ -85,6 +84,10 @@ export default forwardRef(function (
 		downHandler(e, element.current, id)
 	}
 
+	function getInfo() {
+		toggleInfoWindow(id, getBounds().left)
+	}
+
 	const leftHandle = fixed != 'left' && fixed != 'both'
 	const rightHandle = fixed != 'right' && fixed != 'both'
 	const movableBody = !fixed
@@ -98,7 +101,9 @@ export default forwardRef(function (
 				'--base-bg-color': rgbColour,
 				'--base-bg-hsl': hslColour
 			}}>
+
 			<div className="label">{name}</div>
+
 			{leftHandle &&
 				<ResizeHandle downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} id={id} reverse/>
 			}
@@ -106,6 +111,8 @@ export default forwardRef(function (
 				onMouseDown={movableBody ? handleDown : null}
 				onTouchStart={movableBody ? handleDown : null}
 				className='body'>
+
+				<button onClick={getInfo}>Info</button>
 			</div>
 
 			{rightHandle &&
