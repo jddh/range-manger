@@ -10,7 +10,7 @@ import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
 import {createLimits, getRect, createAggregateDimensions, gridSnap} from '../functions/geometry'
 import * as Units from '../functions/units'
-import { hexToRgb } from '../functions/utilities'
+import { hexToRgb, arraysEqual } from '../functions/utilities'
 import './ShiftSchedule.css'
 
 function getOffsets(els, e) {
@@ -54,6 +54,7 @@ export default function ShiftSchedule({
 		disableTouchDrag = true,
 		maxItems = 5,
 		units, 
+		onChange,
 		children
 	}) {
 	const container = useRef(null)
@@ -64,6 +65,7 @@ export default function ShiftSchedule({
 	const [refsconnect, setRefsconnect] = useState(false)
 	const [dragging, setDragging] = useState(false)
 	const [activeInfoWindow, setActiveInfoWindow] = useState(false)
+	const lastDataPoll = useRef(napData)
 
 	//runtime test
 	// console.log(Units.getUnitValue(getPerc(40,100, '')));
@@ -80,7 +82,8 @@ export default function ShiftSchedule({
 	resizeStartX,				//mouse x before resize
 	reverseResize,				//reverse resize from left
 	initClientX,
-	lastActionTimeStamp 
+	lastActionTimeStamp
+	
 
 	//set time range of container
 	// const myRange = [40,80]
@@ -122,6 +125,12 @@ export default function ShiftSchedule({
 
 	useEffect(() => {
 		if (napEls.current.length && napData?.length) updateRefs()
+
+		if (onChange && lastDataPoll.current && !arraysEqual(napData, lastDataPoll.current)) {
+			onChange(napData)
+		}
+
+		lastDataPoll.current = [...napData]
 	}, [napData])
 
 	function pxToCq(px, container = containerRect.width) {
@@ -428,7 +437,7 @@ export default function ShiftSchedule({
 			maxItems={maxItems}
 			activeInfoWindow={activeInfoWindow} 
 			setActiveInfoWindow={setActiveInfoWindow} />
-		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
+		{/* <button onClick={testButton} style={{marginTop: '50px'}}>push me</button> */}
 		</>
 	)
 }

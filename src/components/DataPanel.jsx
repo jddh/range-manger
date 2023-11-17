@@ -71,44 +71,44 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 			{spanData.map((child, index) => 
 				<div 
 					className={classNames({active: showWindow[index]}, 'data-panel')} 
+					style={{left: (showWindow[index]) ? (activeInfoWindow[1].left + activeInfoWindow[1].width/2) : 'auto'}}
 					key={child.id}
-					style={{left: (showWindow[index]) ? activeInfoWindow[1] : 'auto'}}
 				>
 
-					<input type="text" defaultValue={child.name} onBlur={(e) => handleNameChange(e, child)} />
+					<button className="close" onClick={handleClose}>x</button>
 
-					<button className="rm" onClick={handleClose}>x</button>
+					<div className='no-label fieldset'><input type="text" defaultValue={child.name} onBlur={(e) => handleNameChange(e, child)} /></div>
 
-					<fieldset>
+					<div className='fieldset'>
 						<label >start </label>
 						<input className='output' value={Units.getUnitValue(child.x,range,24)} onChange={e => handleStartChange(e, child)} type={unitFieldType} step={unitStep}  />
-					</fieldset>
+					</div>
 
-					<fieldset><label>length </label><input className='output' type="number" step={unitStep} value={Units.getUnitAmount(child.size)} onChange={e => handleLengthChange(e, child)} /></fieldset>
+					<div className='fieldset'><label>length </label><input className='output' type="number" step={unitStep} value={Units.getUnitAmount(child.size)} onChange={e => handleLengthChange(e, child)} /></div>
 
-					<fieldset><label > end </label><input className='output' value={Units.getUnitValue(child.x + child.size)} type='text' disabled /></fieldset>
+					<div className='fieldset'><label > end </label><input className='output' value={Units.getUnitValue(child.x + child.size)} type='text' disabled /></div>
 
 					{intervals[index] && 
-						<fieldset>
+						<div className='fieldset'>
 						<label > interval </label><input className='output' value={Units.getUnitAmount((spanData[index+1].x) - (child.x + child.size))} onChange={e => handleIntervalChange(e, index)} type="number" />
-						</fieldset>}
+						</div>}
 
-					<fieldset>
+					<div className='fieldset'>
 						<label>fixed </label>
 						<select name="" id="" defaultValue={child.fixed} onChange={e => handleFixedChange(e, child)}>
 							{fixedValues.map((fv, i) =>
 								<option value={fv}  key={i} >{fixedLabels[i]}</option>
 							)}
 						</select>
-					</fieldset>
+					</div>
 
-					<fieldset>
+					<div className='fieldset no-label'>
 						<input type="color" defaultValue={child.color} onChange={(e) => handleColourChange(e, child)} />
-					</fieldset>
+					</div>
 
-					<fieldset>
-						<button onClick={() => handleRemove(child.id)}>Remove</button>
-					</fieldset>
+					<div className='fieldset no-label'>
+						<button className="rm" onClick={() => handleRemove(child.id)}>Remove</button>
+					</div>
 				</div>
 			)}
 

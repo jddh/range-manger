@@ -84,8 +84,9 @@ export default forwardRef(function (
 		downHandler(e, element.current, id)
 	}
 
-	function getInfo() {
-		toggleInfoWindow(id, getBounds().left)
+	function getInfo(e) {
+		e.stopPropagation()
+		toggleInfoWindow(id, getBounds())
 	}
 
 	const leftHandle = fixed != 'left' && fixed != 'both'
@@ -112,7 +113,7 @@ export default forwardRef(function (
 				onTouchStart={movableBody ? handleDown : null}
 				className='body'>
 
-				<button onClick={getInfo}>Info</button>
+				<button onMouseDown={getInfo}>Info</button>
 			</div>
 
 			{rightHandle &&

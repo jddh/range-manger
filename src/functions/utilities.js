@@ -51,3 +51,7 @@ export function hexToHSL(hex, lMod = 0) {
 
     return `${h}, ${s}%, ${l}%`;
 }
+
+export function arraysEqual(a,b) {
+    return JSON.stringify(a) === JSON.stringify(b)
+}
