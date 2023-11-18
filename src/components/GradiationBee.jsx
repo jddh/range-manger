@@ -13,11 +13,11 @@ export default function Gradiation({units, range, value}) {
 
 	return (
 		<>
-				<div 
-					className="gradiation" 
-					style={{left: percentValue + 'cqi'}} >
-					<span>{value}</span>
-				</div>
+			<div 
+				className="gradiation" 
+				style={{left: percentValue + '%'}} >
+				<span>{value}</span>
+			</div>
 		</>
 	)
 }

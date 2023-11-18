@@ -7,17 +7,19 @@ body {
 	margin: 0;
 }
 
+.range-slider {
+	width: 100%;
+}
+
 .shifts {
 	position: relative;
-	container-type: inline-size;
 	display: flex;
 	height: 100px;
-	width: 75vw;
 	margin: 0 auto;
 	border: 1px solid var(--ui-border);
 	background-color: #FAFAFA;
 
-	&.disable-touch-drag {
+	.disable-touch-drag & {
 		touch-action: none;
 	}
 }
@@ -61,7 +63,7 @@ body {
 		font-size: 0;
 		background-color: rgba(var(--base-bg-color), .55);
 		border: none;
-		visibility: hidden;
+		/* visibility: hidden; */
 
 		&:after {
 			content: 'III';
@@ -83,7 +85,16 @@ body {
 	}
 
 	&:hover button {
-		visibility: visible;
+		/* visibility: visible; */
+	}
+
+	@media (hover: hover) {
+		& button {
+			visibility: hidden;
+		}
+		&:hover button {
+			visibility: visible;
+		}
 	}
 
 	.label {
@@ -185,6 +196,10 @@ body {
 	cursor: grab;
 	font-size: 0;
 
+	.disable-touch-drag & {
+		touch-action: none;
+	}
+
 	&:after {
 		/* position: absolute; */
 		/* z-index: 1; */
@@ -218,6 +233,7 @@ body {
 		border-radius: 10px;
 		background-color: white;
 		filter: drop-shadow(0 0 4px rgba(0,0,0,0.2));
+		will-change: filter;
 		/* box-shadow: 0 0 9px rgba(0,0,0,0.2); */
 
 		&:after {
@@ -319,14 +335,10 @@ fieldset {
 	}
 }
 
-@media screen and (max-width: 900px) {
-	.shifts {
-		width: 100vw;
-	}
-}
+
 
 @media screen and (max-height: 450px) {
-	button {
+	/* button {
 		display: none;
-	}
+	} */
 }

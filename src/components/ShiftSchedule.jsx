@@ -86,8 +86,8 @@ export default function ShiftSchedule({
 	
 
 	//set time range of container
-	// const myRange = [40,80]
 	const myUnit = 'time'
+	// const myUnit = 'numerical'
 	Units.setUnit(myUnit)
 	const myRange = [Units.getPercentFromUnit('700',[0,100]), Units.getPercentFromUnit('2100',[0,100])]
 	// const myRange = [0,1000]
@@ -199,6 +199,7 @@ export default function ShiftSchedule({
 	}
 
 	function addNap({x, size = 10, fixed}) {
+		//BUG: add to single nap crashes
 
 		//pick largest gap
 		const gaps = napData.map((n,i) => {
@@ -239,6 +240,7 @@ export default function ShiftSchedule({
 	function handleNapDown(e, clickedEl, id) { 
 		//create dynamic limit box
 		createTravelLimits([clickedEl])
+		featureInfoWindow(id)
 
 		//register responsive boundaries
 		currentContainerRect = getRect(container.current)
@@ -293,6 +295,7 @@ export default function ShiftSchedule({
 		let clientX = getClientX(e)
 		initClientX = getClientX(e)
 		createTravelLimits([clickedEl])
+		featureInfoWindow(id)
 		movingEls = [clickedEl]
 		activeIDs = [id]
 		reverseResize = reverse
@@ -399,8 +402,13 @@ export default function ShiftSchedule({
 		else setActiveInfoWindow()
 	}
 
+	function featureInfoWindow(id) {
+		if (activeInfoWindow && activeInfoWindow[0] != id)
+			setActiveInfoWindow()
+	}
+
 	return (
-		<>
+		<div className={classNames({'disable-touch-drag': disableTouchDrag}, 'range-slider')}>
 		<div className={classNames({'drag': dragging, 'disable-touch-drag': disableTouchDrag}, 'shifts', 'ui')} ref={container}>
 			{napData.map((child, index) => 
 				<Nap 
@@ -420,13 +428,15 @@ export default function ShiftSchedule({
 					toggleInfoWindow={toggleInfoWindow}
 					{...child} />
 			)}
-			{/* <Gradiation count={6} units="time" range={myRange} /> */}
-			<GradiationBee  value="1100" units={myUnit} range={myRange}/>
+			<Gradiation interval={120} units={myUnit} range={myRange} />
+			{/* <GradiationBee  value="1100" units={myUnit} range={myRange}/>
 			<GradiationBee  value="1300" units={myUnit} range={myRange}/>
 			<GradiationBee  value="1500" units={myUnit} range={myRange}/>
-			<GradiationBee  value="1700" units={myUnit} range={myRange}/>
+			<GradiationBee  value="1700" units={myUnit} range={myRange}/> */}
 		</div>
+
 		<div className="thumb ui" onMouseDown={handleMoveAllDown} onTouchStart={handleMoveAllDown}>move all</div>
+
 		<DataPanel 
 			spanData={napData} 
 			units={myUnit} 
@@ -437,7 +447,7 @@ export default function ShiftSchedule({
 			maxItems={maxItems}
 			activeInfoWindow={activeInfoWindow} 
 			setActiveInfoWindow={setActiveInfoWindow} />
-		{/* <button onClick={testButton} style={{marginTop: '50px'}}>push me</button> */}
-		</>
+		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
+		</div>
 	)
 }

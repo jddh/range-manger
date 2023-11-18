@@ -1,13 +1,19 @@
 body {
-  min-height: 100vh;
+  /* min-height: 100vh;
 	min-height: 100dvh;
 	width: 100vw;
-	width: 100dvw;
+	width: 100dvw; */
 }
 
 #root {
   max-width: 1280px;
+  min-width: 85vw;
   margin: 0 auto;
   text-align: center;
 }
 
+@media screen and (max-width: 900px) {
+	#root {
+		/* width: 100vw; */
+	}
+}

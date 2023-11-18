@@ -69,6 +69,8 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 	return (
 		<div className="data-panels">
 			{spanData.map((child, index) => 
+			//TODO: keep panel position inside viewport
+			//BUG: numerical range can't convert backwards
 				<div 
 					className={classNames({active: showWindow[index]}, 'data-panel')} 
 					style={{left: (showWindow[index]) ? (activeInfoWindow[1].left + activeInfoWindow[1].width/2) : 'auto'}}

@@ -1,34 +1,27 @@
 import * as Units from '../functions/units'
 
-export default function Gradiation({units, range, count}) {
-	let rangeValues = [], roundedValues = [], n = 0
-
+export default function Gradiation({units, range, interval}) {
+	
 	Units.setUnit(units)
 	Units.setRange(range)
 
-	const cqIncrements = 100 / count
-	while(n < count) {rangeValues.push(cqIncrements * n++ + (cqIncrements/2))}
-	roundedValues = rangeValues.map(r => Units.getRoundedTimeValue(r))
+	const absIntervalPercentage = Units.getPercentFromUnit(interval, [0,100], 'minutes')
+	const intervalPercentage = Units.getPercentFromUnit(interval, range, 'minutes')
+	const numberOfGrades = Math.floor((range[1] - range[0]) / absIntervalPercentage)
+	const rangeValues = Array(numberOfGrades).fill(0).map((_, i) => intervalPercentage * (i+1))
 
 	return (
 		<>
 			{rangeValues.map((rv, i) =>
-				<div 
-					className="gradiation" 
-					style={{left: rv + 'cqi'}} 
-					key={i}>
-					{Units.getUnitValue(rv)}
-				</div>
+				{if (rv < 100) {
+					return <div 
+						className="gradiation" 
+						style={{left: rv + '%'}} 
+						key={i}>
+						<span>{Units.getUnitValue(rv)}</span>
+					</div>}
+				}
 			)} 
-
-			{/* {roundedValues.map(([time, per], i) =>
-				<div 
-					className="gradiation" 
-					style={{left: per + 'cqi'}} 
-					key={i}>
-					{time}
-				</div>
-			)}  */}
 		</>
 	)
 }
