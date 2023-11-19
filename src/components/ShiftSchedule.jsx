@@ -3,7 +3,7 @@ import ShortUniqueId from 'short-unique-id'
 import classNames from 'classnames'
 import Nap from './Nap'
 import Gradiation from './Gradiation'
-import GradiationBee from './GradiationBee'
+import Grade from './Grade'
 import DataPanel from './DataPanel'
 import useSemiPersistentState from '../hooks/semiPersistentState'
 import handleClickDrag from '../functions/handleClickDrag'
@@ -50,6 +50,8 @@ const uid = new ShortUniqueId({ length: 10 })
 
 const defaultNapProps = {color: '#96D3FF'}
 
+//TODO prop for gradiation
+//TODO props for unit handling
 export default function ShiftSchedule({
 		disableTouchDrag = true,
 		maxItems = 5,
@@ -89,8 +91,8 @@ export default function ShiftSchedule({
 	const myUnit = 'time'
 	// const myUnit = 'numerical'
 	Units.setUnit(myUnit)
-	const myRange = [Units.getPercentFromUnit('700',[0,100]), Units.getPercentFromUnit('2100',[0,100])]
-	// const myRange = [0,1000]
+	const myRange = [Units.getPercentFromUnit('700',[0,100], 'point'), Units.getPercentFromUnit('2100',[0,100], 'point')]
+	// const myRange = [50,1000]
 	Units.setRange(myRange)
 
 	//temp log after range set
@@ -199,7 +201,6 @@ export default function ShiftSchedule({
 	}
 
 	function addNap({x, size = 10, fixed}) {
-		//BUG: add to single nap crashes
 
 		//pick largest gap
 		const gaps = napData.map((n,i) => {
@@ -207,10 +208,17 @@ export default function ShiftSchedule({
 			return {i: i-1, gap: n.x - (napData[i-1].x + napData[i-1].size)}
 		}).filter(n => n)
 		.sort((a,b) => a.gap < b.gap ? 1 : -1)
-		const gap = gaps[0]
-		x = napData[gap.i].x + napData[gap.i].size + 1
-		if (gap.gap < 10) size = gap.gap - 4
-
+		//if there is more than one nap
+		if (gaps.length > 1) {
+			const gap = gaps[0]
+			x = napData[gap.i].x + napData[gap.i].size + 1
+			if (gap.gap < 10) size = gap.gap - 4
+		} else {
+			const gap = napData[0]
+			x = gap.x < 50 ?
+				gap.x + gap.size + 1 :
+				gap.x - size - 1
+		}
 
 		let newNaps = [...napData]
 		newNaps.push({
@@ -428,11 +436,16 @@ export default function ShiftSchedule({
 					toggleInfoWindow={toggleInfoWindow}
 					{...child} />
 			)}
+
 			<Gradiation interval={120} units={myUnit} range={myRange} />
-			{/* <GradiationBee  value="1100" units={myUnit} range={myRange}/>
-			<GradiationBee  value="1300" units={myUnit} range={myRange}/>
-			<GradiationBee  value="1500" units={myUnit} range={myRange}/>
-			<GradiationBee  value="1700" units={myUnit} range={myRange}/> */}
+
+			{/* <Grade  value="1100" units={myUnit} range={myRange}/>
+			<Grade  value="1300" units={myUnit} range={myRange}/>
+			<Grade  value="1500" units={myUnit} range={myRange}/>
+			<Grade  value="1700" units={myUnit} range={myRange}/> */}
+
+			{/* <Grade  value="400" units={myUnit} range={myRange}/>
+			<Grade  value="700" units={myUnit} range={myRange}/> */}
 		</div>
 
 		<div className="thumb ui" onMouseDown={handleMoveAllDown} onTouchStart={handleMoveAllDown}>move all</div>

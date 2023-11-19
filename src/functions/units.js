@@ -33,10 +33,17 @@ export function getUnitAmount(perc, range = rangeStore) {
 	}
 }
 
+/**
+ * 
+ * @param {string} type - 'point' for a single value, eg. 12:00; 'range' for eg. 150 minutes 
+ * @returns 
+ */
 export function getPercentFromUnit(val, range = rangeStore, type = 'clock') {
 	switch (unitStore) {
 		case 'time':
-			return (type == 'clock') ? timeToPercentageOfDay(val, range) : minutesToPercentageOfDay(val, range)
+			return (type == 'point') ? timeToPercentageOfDay(val, range) : minutesToPercentageOfDay(val, range)
+		case 'numerical':
+			return (type == 'point') ? numericalToPercentage(val, range) : (val / (range[1] - range[0])) * 100
 	}
 }
 
@@ -49,6 +56,13 @@ function percentageToNumberQuantity(percentage, range = rangeStore) {
 	percentage = parseFloat(percentage)
 	const totalQuantity = range[1] - range[0]
 	return parseFloat(((percentage / 100) * totalQuantity).toFixed(2))
+}
+
+/**
+ * eg single number value relative to range
+ */
+function numericalToPercentage(number, range = rangeStore) {
+	return ((number - range[0]) / (range[1] - range[0])) * 100
 }
 
 function percentageOfDayToTime(percentage, range = rangeStore, format = 12) {

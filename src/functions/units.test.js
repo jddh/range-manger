@@ -3,6 +3,8 @@ import * as Units from './units'
 
 const defaultRange = [0,100]
 
+//TODO: normailize descriptions
+
 test('make good percentage', () => {
 	Units.setUnit('numerical')
 	expect(Units.getUnitValue(50)).toBe(50)
@@ -55,7 +57,22 @@ it('should make minutes into percentage', () => {
 	expect(Units.getPercentFromUnit(rangedFractionalMinutes, range, 'minutes')).toBe(per)
 })
 
+it('should make number ranges into percentage', () => {
+	Units.setUnit('numerical')
+	const range = [25,75]
+	const per = 45
+	const num = (range[1] - range[0]) * (per/100)
+	expect(Units.getPercentFromUnit(num, range)).toBe(per)
+})
+
+it('should make single numbers into percentages', () => {
+	const range = [2, 10]
+	const per = 25
+	expect(Units.getPercentFromUnit(25, range, 'point'))
+})
+
 it.fails('should convert clock to percentage and back without degrading', () => {
+	Units.setUnit('time')
 	const startPer = 46
 	const timeConversion = Units.getUnitValue(46)
 	const returnPer = Units.getPercentFromUnit(timeConversion)

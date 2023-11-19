@@ -7,7 +7,7 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 
 	//TODO if any nap can have fixed values, all the handlers need to account for which edges are available for resize
 	function handleStartChange(e, spanNode) {
-		updateData({x: Units.getPercentFromUnit(e.target.value)}, spanNode.id)
+		updateData({x: Units.getPercentFromUnit(e.target.value, range, 'point')}, spanNode.id)
 	}
 
 	function handleLengthChange(e, spanNode) {
@@ -57,7 +57,7 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 		if (spanData[index+1]) intervals[index] = true
 	})
 	const unitFieldType = (units == 'time') ? 'time' : 'number'
-	const unitStep = (units == 'time') ? "1" : ".01"
+	const unitStep = (units == 'time') ? "1" : (range[1] - range[0]) / 1000
 	const fixedLabels = ['No', 'Left', 'Right', 'Both']
 	const fixedValues = ['', 'left', 'right', 'both']
 
@@ -70,7 +70,6 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 		<div className="data-panels">
 			{spanData.map((child, index) => 
 			//TODO: keep panel position inside viewport
-			//BUG: numerical range can't convert backwards
 				<div 
 					className={classNames({active: showWindow[index]}, 'data-panel')} 
 					style={{left: (showWindow[index]) ? (activeInfoWindow[1].left + activeInfoWindow[1].width/2) : 'auto'}}
@@ -86,7 +85,10 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 						<input className='output' value={Units.getUnitValue(child.x,range,24)} onChange={e => handleStartChange(e, child)} type={unitFieldType} step={unitStep}  />
 					</div>
 
-					<div className='fieldset'><label>length </label><input className='output' type="number" step={unitStep} value={Units.getUnitAmount(child.size)} onChange={e => handleLengthChange(e, child)} /></div>
+					<div className='fieldset'>
+						<label>length </label>
+						<input className='output' type="number" step={unitStep} value={Units.getUnitAmount(child.size)} onChange={e => handleLengthChange(e, child)} />
+					</div>
 
 					<div className='fieldset'><label > end </label><input className='output' value={Units.getUnitValue(child.x + child.size)} type='text' disabled /></div>
 
