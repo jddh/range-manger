@@ -4,7 +4,7 @@ import RangeManger from './components/RangeManger'
 import Range from './components/Range'
 
 function iChanged(data) {
-	//console.log('a change: ', data);
+	// console.log('a change: ', data);
 }
 
 function App() {

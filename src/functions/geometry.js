@@ -42,8 +42,8 @@ export function getRect(el) {
 	return el.getBoundingClientRect()
 }
 
-export function gridSnap(x) {
-	const decimalRound = .333		//snap to sub-pixels at these marks
+export function gridSnap(x, round) {
+	const decimalRound = round		//snap to sub-pixels at these marks
 	const factor = 1 / decimalRound
 	return Math.round(x * factor) / factor
 }

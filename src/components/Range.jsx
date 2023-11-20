@@ -21,7 +21,7 @@ function getPerc(px, total, style = '') {
 
 const Range = forwardRef(function (
 	{
-		fixed, className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, showInfo, id, factive, currentBounds, timeRange, units, color, name, toggleInfoWindow
+		fixed, className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, showInfo, id, factive, currentBounds, timeRange, units, pxGrid, color, name, toggleInfoWindow
 	}, ref) {
 	const element = useRef(null)
 	useImperativeHandle(ref, () => ({getBounds: getBounds, el: element.current, id: id}))
@@ -97,8 +97,8 @@ const Range = forwardRef(function (
 		<div ref={element} 
 			className={classNames(className, {active: factive},'range')} 
 			style={{
-				left: gridSnap(adjustedX) + '%', 
-				width: gridSnap(size) + '%',
+				left: gridSnap(adjustedX, pxGrid) + '%', 
+				width: gridSnap(size, pxGrid) + '%',
 				'--base-bg-color': rgbColour,
 				'--base-bg-hsl': hslColour
 			}}>

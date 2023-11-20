@@ -59,6 +59,7 @@ export default function RangeManger({
 		addMore = true,
 		showInfo = true,
 		localStoreData = true,
+		pxGrid = .2,
 		onChange,
 		children
 	}) {
@@ -68,11 +69,11 @@ export default function RangeManger({
 	const container = useRef(null)
 	//raw storage for backrefs
 	const rangeEls = useRef(new Array())
+	//groomed storage for backrefs
+	const [rangeElLookup, setRangeElLookup] = useState([])
 	const [containerRect, setRect] = useState()
 	//main datastore
 	const [rangeData, setRangeData] = userLocalStoreData ? useSemiPersistentState('rangeData', [], 'factive') : useState([])
-	//groomed storage for backrefs
-	const [rangeElLookup, setRangeElLookup] = useState([])
 	//has rangeElLookup been built
 	const [refsconnect, setRefsconnect] = useState(false)
 	const [dragging, setDragging] = useState(false)
@@ -143,7 +144,7 @@ export default function RangeManger({
 	}
 
 	function pxToPer(px, container = containerRect.width, suffix = '%') {
-		return gridSnap(getPerc(px, container)) + suffix
+		return gridSnap(getPerc(px, container), pxGrid) + suffix
 	}
 
 	/**
@@ -329,14 +330,45 @@ export default function RangeManger({
 		limitRect = createLimits(otherEls, activeEls, container.current)
 	}
 
-	function isCollision(mouseX) {
+	function isCollision(mouseX, intent) {
 		const rect = createAggregateDimensions(movingEls)
-		const mouseIntent = mouseX - currentMouseX	// +1 for right
+		let mouseIntent
+		if (mouseX) mouseIntent = mouseX - currentMouseX	// +1 for right
+		else mouseIntent = intent
 		if (rect.right + mouseIntent >= limitRect.right && mouseIntent > 0)
 			return 'right';
 		if(rect.left + mouseIntent <= limitRect.left && mouseIntent < 0)
 			return 'left'
 		else return false
+	}
+
+	function isDataCollision(data, direction, action, id) {
+		let collide = false
+		const nodes = sortXAsc([...rangeData])
+		const thisIndex = nodes.findIndex(n => n.id == id)
+		const rightEdge = {x: 100, right: 100}
+		const thisNode = nodes[thisIndex]
+		const sibNode = nodes[thisIndex + 1] || rightEdge
+		// const sibsibNode = nodes[thisIndex + 2] || rightEdge
+		const preNode = (thisIndex > 0) ? nodes[thisIndex-1] : {x:0,right:0, size: 0}
+		thisNode.right = thisNode.x + thisNode.size
+		sibNode.right = sibNode.x + sibNode.size
+		// sibsibNode.right = sibsibNode.x + sibsibNode.size
+		preNode.right = preNode.x + preNode.size
+		/**
+		 * 1. increase size && sibling block
+		 * 2. increase start && sibling block
+		 * 3. decrease start && pre block
+		 * 4. increase interval && sibsib block
+		 * 5. decrease interval && self block
+		 */
+		if (
+			thisNode.right + direction > sibNode.x ||
+			(action == 'start' || 'interval') && thisNode.x + direction < preNode.right 
+		)
+			collide = true
+
+		return collide
 	}
 
 	function snapToLimit(mouseX, action = 'move') {
@@ -370,7 +402,7 @@ export default function RangeManger({
 		})
 	}
 
-	function resizeRangeIntent(e) {
+	function resizeRangeIntent(e, x) {
 		let clientX = getClientX(e)
 		let delta = clientX - resizeStartX
 		if (reverseResize) delta *= -1
@@ -385,6 +417,50 @@ export default function RangeManger({
 
 		resizeElement(movingEls[0], resizeStartWidth + delta, reverseMotion)
 	}
+
+	function transformRangeOld(transforms, intent, id) {
+	currentContainerRect = getRect(container.current)
+	const rangeEl = getRangeRef(id).el
+	const rangeRect = getRangeRef(id).getBounds()
+	switch(intent) {
+		case 'resize':
+			// const rqSizePx = Math.ceil((Units.getPercentFromUnit(transforms.size, myRange, 'range') / 100) * currentContainerRect.width)
+			const rqSizePx = rangeRect.width + 1
+			const delta = rqSizePx - rangeRect.width
+			console.log(delta);
+			resizeStartX = resizeStartWidth = rangeRect.width
+			movingEls = [rangeEl]
+			createTravelLimits(movingEls)
+			resizeRangeIntent({clientX: rqSizePx})
+		break
+	}
+	}
+
+	function transformRange(transforms, action, id) {
+	// currentContainerRect = getRect(container.current)
+	const range = getRange(id)
+	let direction
+	switch(action) {
+		case 'resize':
+			const newSize = Units.getPercentFromUnit(transforms.size, myRange, 'range')
+			direction = newSize - range.size
+			if (!isDataCollision({size: newSize}, direction, action, id))
+				setRange({size: newSize}, id)
+		break
+		case 'start':
+			const newX = Units.getPercentFromUnit(transforms.x, myRange, 'point')
+			direction = newX - range.x
+			if (!isDataCollision({x: newX}, direction, action, id))
+				setRange({x: newX}, id)
+		break
+		case 'interval':
+			const newDistance = Units.getPercentFromUnit(transforms.distance, myRange, 'range')
+			const newSiblingX = transforms.width + newDistance
+			direction = newSiblingX - range.x
+			if (!isDataCollision({x: newSiblingX}, direction, action, id))
+				setRange({x: newSiblingX}, id)
+	}
+	}	
 	
 	function moveElement(el, x) {
 		if (!el) return
@@ -435,6 +511,7 @@ export default function RangeManger({
 					currentBounds={child.currentBounds}
 					timeRange={myRange}
 					units={myUnit}
+					pxGrid={pxGrid}
 					toggleInfoWindow={toggleInfoWindow}
 					{...child} />
 			)}
@@ -459,6 +536,7 @@ export default function RangeManger({
 			getContainerRect={() => getRect(container.current)}
 			updateData={setRange}
 			deleteData={removeRange}
+			transformRange={transformRange}
 			newSpan={addRange}
 			maxItems={maxItems}
 			addMore={userAddMore}

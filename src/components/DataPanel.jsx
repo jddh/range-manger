@@ -3,7 +3,7 @@ import { getRect } from '../functions/geometry'
 import classNames from 'classnames'
 import * as Units from '../functions/units'
 
-export default function DataPanel ({rangeData, units, range, updateData, deleteData, newSpan, maxItems, addMore, activeInfoWindow, getContainerRect, setActiveInfoWindow, changeColor}) {
+export default function DataPanel ({rangeData, units, range, updateData, deleteData, newSpan, maxItems, addMore, activeInfoWindow, getContainerRect, setActiveInfoWindow, changeColor, transformRange}) {
 
 	const activePanelRef = useRef(null)
 
@@ -28,30 +28,32 @@ export default function DataPanel ({rangeData, units, range, updateData, deleteD
 
 	//TODO if any range can have fixed values, all the handlers need to account for which edges are available for resize
 	function handleStartChange(e, spanNode) {
-		updateData({x: Units.getPercentFromUnit(e.target.value, range, 'point')}, spanNode.id)
+		transformRange({x: e.target.value}, 'start', spanNode.id)
+		// updateData({x: Units.getPercentFromUnit(e.target.value, range, 'point')}, spanNode.id)
 	}
 
 	function handleLengthChange(e, spanNode) {
-		updateData({size: Units.getPercentFromUnit(e.target.value, range, 'range')}, spanNode.id)
+		transformRange({size: e.target.value}, 'resize', spanNode.id)
+		// updateData({size: Units.getPercentFromUnit(e.target.value, range, 'range')}, spanNode.id)
 	}
 
 	const handleIntervalChange = (e, index) => {
 		const child = rangeData[index]
 		const sibling =  rangeData[index + 1]
-		const distance = Units.getPercentFromUnit(e.target.value, range, 'minutes')
-		//BUG this wiggles the right bound, whereas core resize does not
-		//BUG no collision
-		if (sibling.fixed == 'right') {
-			const currentX = sibling.x
-			const newX = (child.x + child.size) + distance
-			const delta = currentX - newX
-			const newSize = sibling.size + delta
-			updateData({x: newX, size: newSize}, sibling.id)
-		}
-		else {
-			const newX = (child.x + child.size) + distance
-			updateData({x: newX}, sibling.id)
-		}
+		// const distance = Units.getPercentFromUnit(e.target.value, range, 'minutes')
+		// if (sibling.fixed == 'right') {
+		// 	const currentX = sibling.x
+		// 	const newX = (child.x + child.size) + distance
+		// 	const delta = currentX - newX
+		// 	const newSize = sibling.size + delta
+		// 	updateData({x: newX, size: newSize}, sibling.id)
+		// }
+		// else {
+		// 	const newX = (child.x + child.size) + distance
+		// 	updateData({x: newX}, sibling.id)
+		// }
+
+		transformRange({distance: e.target.value, width: child.x+child.size}, 'interval', sibling.id)
 	}
 
 	function handleFixedChange(e, spanNode) {
