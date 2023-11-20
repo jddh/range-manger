@@ -19,9 +19,9 @@ function getPerc(px, total, style = '') {
 	return perc
 }
 
-export default forwardRef(function (
+const Range = forwardRef(function (
 	{
-		fixed, className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, id, factive, currentBounds, timeRange, units, color, name, toggleInfoWindow
+		fixed, className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, showInfo, id, factive, currentBounds, timeRange, units, color, name, toggleInfoWindow
 	}, ref) {
 	const element = useRef(null)
 	useImperativeHandle(ref, () => ({getBounds: getBounds, el: element.current, id: id}))
@@ -113,7 +113,7 @@ export default forwardRef(function (
 				onTouchStart={movableBody ? handleDown : null}
 				className='body'>
 
-				<button onMouseDown={getInfo}>Info</button>
+				{showInfo && <button onMouseDown={getInfo}>Info</button>}
 			</div>
 
 			{rightHandle &&
@@ -126,3 +126,6 @@ export default forwardRef(function (
 		</div>
 	)
 })
+
+Range.displayName = 'Range'
+export default Range

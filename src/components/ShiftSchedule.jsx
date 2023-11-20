@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, Children, cloneElement, useMemo } from 'react'
 import ShortUniqueId from 'short-unique-id'
 import classNames from 'classnames'
-import Nap from './Nap'
+import Range from './Range'
 import Gradiation from './Gradiation'
 import Grade from './Grade'
 import DataPanel from './DataPanel'
@@ -50,15 +50,19 @@ const uid = new ShortUniqueId({ length: 10 })
 
 const defaultNapProps = {color: '#96D3FF'}
 
-//TODO prop for gradiation
-//TODO props for unit handling
 export default function ShiftSchedule({
 		disableTouchDrag = true,
 		maxItems = 5,
-		units, 
+		units = 'time', 
+		range = ['700','2100'],
+		gradiation = 120,
+		changeColor = true,
+		addMore = true,
+		showInfo = true,
 		onChange,
 		children
 	}) {
+
 	const container = useRef(null)
 	const napEls = useRef(new Array())
 	const [containerRect, setRect] = useState()
@@ -86,17 +90,18 @@ export default function ShiftSchedule({
 	initClientX,
 	lastActionTimeStamp
 	
+	//cast prop types
+	changeColor = changeColor === 'true' || changeColor === true
+	addMore = addMore === 'true' || addMore === true
+	showInfo = showInfo === 'true' || showInfo === true
 
 	//set time range of container
-	const myUnit = 'time'
-	// const myUnit = 'numerical'
+	const myUnit = units
 	Units.setUnit(myUnit)
-	const myRange = [Units.getPercentFromUnit('700',[0,100], 'point'), Units.getPercentFromUnit('2100',[0,100], 'point')]
-	// const myRange = [50,1000]
+	const myRange = units == 'time' ? 
+		[Units.getPercentFromUnit(range[0],[0,100], 'point'), Units.getPercentFromUnit(range[1],[0,100], 'point')] 
+		: [parseInt(range[0]), parseInt(range[1])]
 	Units.setRange(myRange)
-
-	//temp log after range set
-	// console.log(Units.getUnitAmount(20));
 
 	useEffect(function() {
 		//create data from component children
@@ -419,7 +424,7 @@ export default function ShiftSchedule({
 		<div className={classNames({'disable-touch-drag': disableTouchDrag}, 'range-slider')}>
 		<div className={classNames({'drag': dragging, 'disable-touch-drag': disableTouchDrag}, 'shifts', 'ui')} ref={container}>
 			{napData.map((child, index) => 
-				<Nap 
+				<Range 
 					fixed={child.fixed}
 					containerRect={containerRect} 
 					getContainerRect={() => getRect(container.current)} 
@@ -427,9 +432,9 @@ export default function ShiftSchedule({
 					sizer={resizeElement}
 					downHandler={handleNapDown} 
 					resizeDownHandler={handleNapResizeDown}
+					showInfo={showInfo}
 					ref={(element) => napEls.current.push(element)} 
 					key={child.id}
-					// factive={child.factive}
 					currentBounds={child.currentBounds}
 					timeRange={myRange}
 					units={myUnit}
@@ -437,29 +442,33 @@ export default function ShiftSchedule({
 					{...child} />
 			)}
 
-			<Gradiation interval={120} units={myUnit} range={myRange} />
+			{typeof gradiation === 'number' || 'string' &&
+				<Gradiation interval={gradiation} units={myUnit} range={myRange} />
+			}
 
-			{/* <Grade  value="1100" units={myUnit} range={myRange}/>
-			<Grade  value="1300" units={myUnit} range={myRange}/>
-			<Grade  value="1500" units={myUnit} range={myRange}/>
-			<Grade  value="1700" units={myUnit} range={myRange}/> */}
-
-			{/* <Grade  value="400" units={myUnit} range={myRange}/>
-			<Grade  value="700" units={myUnit} range={myRange}/> */}
+			{typeof gradiation === 'object' &&
+				gradiation.map((g,i) =>
+					<Grade value={g} units={myUnit} range={myRange} key={i}/>
+			)}
 		</div>
 
 		<div className="thumb ui" onMouseDown={handleMoveAllDown} onTouchStart={handleMoveAllDown}>move all</div>
 
+		{showInfo &&
 		<DataPanel 
 			spanData={napData} 
 			units={myUnit} 
 			range={myRange}
+			getContainerRect={() => getRect(container.current)}
 			updateData={setNap}
 			deleteData={removeNap}
 			newSpan={addNap}
 			maxItems={maxItems}
+			addMore={addMore}
+			changeColor={changeColor}
 			activeInfoWindow={activeInfoWindow} 
-			setActiveInfoWindow={setActiveInfoWindow} />
+			setActiveInfoWindow={setActiveInfoWindow} />}
+
 		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
 		</div>
 	)

@@ -226,7 +226,7 @@ body {
 		grid-template-areas: "legend data";
 		grid-auto-rows: auto;
 		flex: 1;
-		margin-left: -5.7em;
+		/* margin-left: -5.7em; */
 		padding: 13px;
 		text-align: left;
 		visibility: hidden;

@@ -1,7 +1,28 @@
+import { useEffect, useRef } from 'react'
+import { getRect } from '../functions/geometry'
 import classNames from 'classnames'
 import * as Units from '../functions/units'
 
-export default function DataPanel ({spanData, units, range, updateData, deleteData, newSpan, maxItems, activeInfoWindow, setActiveInfoWindow}) {
+export default function DataPanel ({spanData, units, range, updateData, deleteData, newSpan, maxItems, addMore, activeInfoWindow, getContainerRect, setActiveInfoWindow, changeColor}) {
+
+	const activePanelRef = useRef(null)
+
+	//position panel popup relative to size of span and container
+	useEffect(() => {
+		if (!activeInfoWindow) return
+		const panelWidth = getRect(activePanelRef.current).width
+		let leftPos = activeInfoWindow[1].left + activeInfoWindow[1].width/2 - panelWidth/2
+		activePanelRef.current.style.left = leftPos + 'px'
+		//adjust for container edges
+		const positionedPanelRect = getRect(activePanelRef.current)
+		const containerRect = getContainerRect()
+		if (positionedPanelRect.right > containerRect.right)
+			leftPos = leftPos - (positionedPanelRect.right - containerRect.right)
+		if (positionedPanelRect.left < containerRect.left)
+			leftPos = leftPos - (positionedPanelRect.left - containerRect.left)
+		activePanelRef.current.style.left = leftPos + 'px'
+	}, [activeInfoWindow])
+
 	Units.setUnit(units)
 	Units.setRange(range)
 
@@ -63,16 +84,15 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 
 	let showWindow
 	if (activeInfoWindow)
-		showWindow = spanData.map(child => activeInfoWindow[0] == child.id)
+		showWindow = spanData.map(child => activeInfoWindow[0] == child.id)	
 	else showWindow = []
 
 	return (
 		<div className="data-panels">
 			{spanData.map((child, index) => 
-			//TODO: keep panel position inside viewport
-				<div 
+				<div
+					ref={showWindow[index] ? activePanelRef : null}
 					className={classNames({active: showWindow[index]}, 'data-panel')} 
-					style={{left: (showWindow[index]) ? (activeInfoWindow[1].left + activeInfoWindow[1].width/2) : 'auto'}}
 					key={child.id}
 				>
 
@@ -106,9 +126,10 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 						</select>
 					</div>
 
+					{changeColor &&
 					<div className='fieldset no-label'>
 						<input type="color" defaultValue={child.color} onChange={(e) => handleColourChange(e, child)} />
-					</div>
+					</div>}
 
 					<div className='fieldset no-label'>
 						<button className="rm" onClick={() => handleRemove(child.id)}>Remove</button>
@@ -116,9 +137,10 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 				</div>
 			)}
 
+			{addMore && 
 			<div className="meta-controls">
 				<button className="add" disabled={spanData.length >= maxItems} onClick={newSpan}>add</button>
-			</div>
+			</div>}
 		</div>
 	)
 }
