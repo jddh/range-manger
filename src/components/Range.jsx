@@ -95,7 +95,7 @@ const Range = forwardRef(function (
 	
 	return (
 		<div ref={element} 
-			className={classNames(className, {active: factive},'nap')} 
+			className={classNames(className, {active: factive},'range')} 
 			style={{
 				left: gridSnap(adjustedX) + '%', 
 				width: gridSnap(size) + '%',

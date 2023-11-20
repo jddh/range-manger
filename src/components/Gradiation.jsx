@@ -1,6 +1,6 @@
 import * as Units from '../functions/units'
 
-export default function Gradiation({units, range, interval}) {
+export default function Grades({units, range, interval}) {
 	
 	Units.setUnit(units)
 	Units.setRange(range)

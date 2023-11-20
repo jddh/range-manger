@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import ShiftSchedule from './components/ShiftSchedule'
+import RangeManger from './components/RangeManger'
 import Range from './components/Range'
 
 function iChanged(data) {
@@ -11,7 +11,7 @@ function App() {
 
 	return (
 		<>
-			<ShiftSchedule 
+			<RangeManger 
 				// units="time"
 				// units="numerical"
 				// range={['900', '1800']}
@@ -21,6 +21,7 @@ function App() {
 				// changeColor='false'
 				// addMore='false'
 				// showInfo="false"
+				// localStoreData='false'
 				onChange={iChanged}>
 
 				<Range
@@ -33,6 +34,7 @@ function App() {
 					className="second"
 					x="40"
 					size="10"
+					color="#000000"
 				/>
 				<Range 
 					className="second"
@@ -44,7 +46,7 @@ function App() {
 					size="10"
 					fixed="right"
 				/>
-			</ShiftSchedule>
+			</RangeManger>
 		</>
 	)
 }

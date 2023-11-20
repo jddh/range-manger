@@ -28,7 +28,7 @@ body {
 	user-select: none;
 }
 
-.nap {
+.range {
 	--base-bg-color: 172, 220, 255;
 	--base-bg-hsl: 0, 0, 0;
 

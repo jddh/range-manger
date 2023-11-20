@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, Children, cloneElement, useMemo } from 're
 import ShortUniqueId from 'short-unique-id'
 import classNames from 'classnames'
 import Range from './Range'
-import Gradiation from './Gradiation'
+import Grades from './Gradiation'
 import Grade from './Grade'
 import DataPanel from './DataPanel'
 import useSemiPersistentState from '../hooks/semiPersistentState'
@@ -10,8 +10,8 @@ import handleClickDrag from '../functions/handleClickDrag'
 import handleTouchDrag from '../functions/handleTouchDrag'
 import {createLimits, getRect, createAggregateDimensions, gridSnap} from '../functions/geometry'
 import * as Units from '../functions/units'
-import { hexToRgb, arraysEqual } from '../functions/utilities'
-import './ShiftSchedule.css'
+import { hexToRgb, arraysEqual, convertToBooleanVars } from '../functions/utilities'
+import './RangeSlider.css'
 
 function getOffsets(els, e) {
 	const clientX = getClientX(e)
@@ -20,7 +20,6 @@ function getOffsets(els, e) {
 }
 
 function getClientX(e) {
-	//return e.clientX
 	return e.touches ? e.touches[0].clientX : e.clientX
 }
 
@@ -48,9 +47,9 @@ function sortXAsc(array) {
 
 const uid = new ShortUniqueId({ length: 10 })
 
-const defaultNapProps = {color: '#96D3FF'}
+const defaultRangeProps = {color: '#96D3FF'}
 
-export default function ShiftSchedule({
+export default function RangeManger({
 		disableTouchDrag = true,
 		maxItems = 5,
 		units = 'time', 
@@ -59,41 +58,37 @@ export default function ShiftSchedule({
 		changeColor = true,
 		addMore = true,
 		showInfo = true,
+		localStoreData = true,
 		onChange,
 		children
 	}) {
 
+	const [userChangeColor, userAddMore, userShowInfo, userLocalStoreData] = convertToBooleanVars(changeColor, addMore, showInfo, localStoreData)
+
 	const container = useRef(null)
-	const napEls = useRef(new Array())
+	//raw storage for backrefs
+	const rangeEls = useRef(new Array())
 	const [containerRect, setRect] = useState()
-	const [napData, setNapData] = useSemiPersistentState('napData', [], 'factive')
-	const [napElLookup, setNapElLookup] = useState([])
+	//main datastore
+	const [rangeData, setRangeData] = userLocalStoreData ? useSemiPersistentState('rangeData', [], 'factive') : useState([])
+	//groomed storage for backrefs
+	const [rangeElLookup, setRangeElLookup] = useState([])
+	//has rangeElLookup been built
 	const [refsconnect, setRefsconnect] = useState(false)
 	const [dragging, setDragging] = useState(false)
 	const [activeInfoWindow, setActiveInfoWindow] = useState(false)
-	const lastDataPoll = useRef(napData)
-
-	//runtime test
-	// console.log(Units.getUnitValue(getPerc(40,100, '')));
+	const lastDataPoll = useRef(rangeData)
 
 	//memory vars for event handlers
 	let currentMouseX, 			//last mouse x pos
 	currentContainerRect, 		//rect of nap holder
 	limitRect, 					//limit rect for movingEls
 	movingEls, 					//array of moving els
-	movingRect,					//aggregate moving object
 	movingOffsets,				//array of mouse pos offsets relative to moving els
 	activeIDs,					//array of nap ids moving
 	resizeStartWidth,			//width before resize
 	resizeStartX,				//mouse x before resize
-	reverseResize,				//reverse resize from left
-	initClientX,
-	lastActionTimeStamp
-	
-	//cast prop types
-	changeColor = changeColor === 'true' || changeColor === true
-	addMore = addMore === 'true' || addMore === true
-	showInfo = showInfo === 'true' || showInfo === true
+	reverseResize				//reverse resize from left
 
 	//set time range of container
 	const myUnit = units
@@ -106,39 +101,42 @@ export default function ShiftSchedule({
 	useEffect(function() {
 		//create data from component children
 		setRect(container.current.getBoundingClientRect())
-		if (napData.length) {
+		if (rangeData.length) {
 			updateRefs()
 			return
 		}
 
+		//if there's no saved data, build ranges from children
 		const items = Children.map(children, (c, i) => {
 			let formattedChild = {
-				id: uid.rnd(), 
+				id: uid.rnd(),
+				...defaultRangeProps,
 				...c.props,
 				x: parseInt(c.props.x),
 				size: parseInt(c.props.size),
-				name: `Span ${i+1}`,
-				...defaultNapProps
+				name: `Span ${i+1}`
 				}
 
-			if (napData && napData[i]) formattedChild = {...formattedChild, ...napData[i], factive: false}
+			if (rangeData && rangeData[i]) formattedChild = {...formattedChild, ...rangeData[i], factive: false}
 			return formattedChild
 		})
 
 		sortXAsc(items)
 
-		setNapData(items) 
+		setRangeData(items) 
 	}, [])
 
 	useEffect(() => {
-		if (napEls.current.length && napData?.length) updateRefs()
+		//prevent possible disconnection of back-refs
+		if (rangeEls.current.length && rangeData?.length) updateRefs()
 
-		if (onChange && lastDataPoll.current && !arraysEqual(napData, lastDataPoll.current)) {
-			onChange(napData)
+		//TODO output data as units
+		if (onChange && lastDataPoll.current && !arraysEqual(rangeData, lastDataPoll.current)) {
+			onChange(rangeData)
 		}
 
-		lastDataPoll.current = [...napData]
-	}, [napData])
+		lastDataPoll.current = [...rangeData]
+	}, [rangeData])
 
 	function pxToCq(px, container = containerRect.width) {
 		return getPerc(px, container) + 'cqi'
@@ -153,15 +151,15 @@ export default function ShiftSchedule({
 	 * @returns 
 	 */
 	function updateRefs() {
-		if (refsconnect && napElLookup.length == napData.length) return;
-		const validNapEls = napEls.current.filter(e => e)
-		setNapElLookup(
-			napData.map((i) => {
+		if (refsconnect && rangeElLookup.length == rangeData.length) return;
+		const validRangeEls = rangeEls.current.filter(e => e)
+		setRangeElLookup(
+			rangeData.map((i) => {
 			  let item = {}
-			  const ix = validNapEls.findIndex(e => e.id == i.id)
+			  const ix = validRangeEls.findIndex(e => e.id == i.id)
 			  item.id = i.id
-			  item.el = validNapEls[ix].el
-			  item.getBounds = validNapEls[ix].getBounds
+			  item.el = validRangeEls[ix].el
+			  item.getBounds = validRangeEls[ix].getBounds
 			  return item;
 			})
 		);
@@ -175,82 +173,81 @@ export default function ShiftSchedule({
 		})
 	}
 
-	function getNap(id) {
-		const ix = napData.findIndex((e) => e.id == id);
-		return napData[ix]
+	function getRange(id) {
+		const ix = rangeData.findIndex((e) => e.id == id);
+		return rangeData[ix]
 	}
 
-	function getNapRef(id) {
-		return napElLookup.filter(nte => nte.id == id).shift()
+	function getRangeRef(id) {
+		return rangeElLookup.filter(nte => nte.id == id).shift()
 	}
 
-	function setNap(props, id) {
-		const ix = napData.findIndex((e) => e.id == id)
-		let data = [...napData]
+	function setRange(props, id) {
+		const ix = rangeData.findIndex((e) => e.id == id)
+		let data = [...rangeData]
 		data[ix] = {...data[ix], ...props}
-		setNapData(data)
+		setRangeData(data)
 	}
 
 	/**
 	 * 
-	 * @param {array} naps [props, id]
+	 * @param {array} ranges [props, id]
 	 */
-	function setNaps(naps) {
-		let data = [...napData]
-		naps.forEach(([props, id]) => {
+	function setRanges(ranges) {
+		let data = [...rangeData]
+		ranges.forEach(([props, id]) => {
 			const ix = data.findIndex((e) => e.id == id)
 			data[ix] = {...data[ix], ...props}
 		})
 		
-		setNapData(data)
+		setRangeData(data)
 	}
 
-	function addNap({x, size = 10, fixed}) {
+	function addRange({x, size = 10, fixed}) {
 
 		//pick largest gap
-		const gaps = napData.map((n,i) => {
+		const gaps = rangeData.map((n,i) => {
 			if (i == 0) return 0
-			return {i: i-1, gap: n.x - (napData[i-1].x + napData[i-1].size)}
+			return {i: i-1, gap: n.x - (rangeData[i-1].x + rangeData[i-1].size)}
 		}).filter(n => n)
 		.sort((a,b) => a.gap < b.gap ? 1 : -1)
 		//if there is more than one nap
 		if (gaps.length > 1) {
 			const gap = gaps[0]
-			x = napData[gap.i].x + napData[gap.i].size + 1
+			x = rangeData[gap.i].x + rangeData[gap.i].size + 1
 			if (gap.gap < 10) size = gap.gap - 4
 		} else {
-			const gap = napData[0]
+			const gap = rangeData[0]
 			x = gap.x < 50 ?
 				gap.x + gap.size + 1 :
 				gap.x - size - 1
 		}
 
-		let newNaps = [...napData]
-		newNaps.push({
+		let newRanges = [...rangeData]
+		newRanges.push({
 			x: x, 
 			size: size, 
 			fixed: fixed, 
-			name: `Span ${napData.length+1}`,
+			name: `Span ${rangeData.length+1}`,
 			id: uid.rnd(),
-			...defaultNapProps
+			...defaultRangeProps
 		})
-		sortXAsc(newNaps)
-		setNapData(newNaps)
+		sortXAsc(newRanges)
+		setRangeData(newRanges)
 	}
 
-	function removeNap(id) {
-		let data = [...napData]
+	function removeRange(id) {
+		let data = [...rangeData]
 		const ix = data.findIndex((e) => e.id == id)
 		data.splice(ix, 1)
-		setNapData(data)
+		setRangeData(data)
 	}
 
 	function testButton(e) {
 		clearCache()
-		// console.log(napElLookup);
 	}
 
-	function handleNapDown(e, clickedEl, id) { 
+	function handleRangeDown(e, clickedEl, id) { 
 		//create dynamic limit box
 		createTravelLimits([clickedEl])
 		featureInfoWindow(id)
@@ -259,54 +256,54 @@ export default function ShiftSchedule({
 		currentContainerRect = getRect(container.current)
 		movingOffsets = getOffsets([clickedEl], e)
 		movingEls = [clickedEl]
-		movingRect = createAggregateDimensions(movingEls)
+		// movingRect = createAggregateDimensions(movingEls)
 		activeIDs = [id]
-		lastActionTimeStamp = new Date().getTime()
-		setNap({factive: true}, id)
-		initClientX = getClientX(e)
+		// lastActionTimeStamp = new Date().getTime()
+		setRange({factive: true}, id)
+		// initClientX = getClientX(e)
 		setDragging(true)
 
 		//activate drag handler
-		if (e.touches) handleTouchDrag(moveNapIntent, releaseNap)
-		else handleClickDrag(moveNapIntent, releaseNap)
+		if (e.touches) handleTouchDrag(moveRangeIntent, releaseRange)
+		else handleClickDrag(moveRangeIntent, releaseRange)
 	}
 
-	function releaseNap(e) {
-		let napsToUpdate = []
+	function releaseRange(e) {
+		let rangesToUpdate = []
 		//if cursor has actually moved
 		//TODO touch needs a bigger null zone
 		if (e.clientX ) {
 		activeIDs.forEach(id => {
-			const bounds = getNapRef(id).getBounds()
+			const bounds = getRangeRef(id).getBounds()
 			const left = getPerc(bounds.left, currentContainerRect.width)
 			const width = getPerc(bounds.width, currentContainerRect.width)
-			napsToUpdate.push([{x: left, size: width}, id])
+			rangesToUpdate.push([{x: left, size: width}, id])
 		}) }
 		else {
-			napsToUpdate = activeIDs.map(id => [{factive: false}, id])
+			rangesToUpdate = activeIDs.map(id => [{factive: false}, id])
 		}
 
 		setDragging(false)
-		setNaps(napsToUpdate)
+		setRanges(rangesToUpdate)
 	}
 
 	function handleMoveAllDown(e) {
-		initClientX = getClientX(e)
-		movingEls = napData.map(({id, fixed}) => !fixed ? getNapRef(id).el : null
+		// initClientX = getClientX(e)
+		movingEls = rangeData.map(({id, fixed}) => !fixed ? getRangeRef(id).el : null
 		).filter(el => el)
-		activeIDs = napData.map(({id, fixed}) => !fixed ? id : null).filter(id => id)
+		activeIDs = rangeData.map(({id, fixed}) => !fixed ? id : null).filter(id => id)
 		createTravelLimits(movingEls)
 		currentContainerRect = getRect(container.current)
 		movingOffsets = getOffsets(movingEls, e)
-		setNaps(napData.map(nd => [{factive: true}, nd.id]))
+		setRanges(rangeData.map(nd => [{factive: true}, nd.id]))
 
-		if (e.touches) handleTouchDrag(moveNapIntent, releaseNap)
-		else handleClickDrag(moveNapIntent, releaseNap)
+		if (e.touches) handleTouchDrag(moveRangeIntent, releaseRange)
+		else handleClickDrag(moveRangeIntent, releaseRange)
 	}
 
-	function handleNapResizeDown(e, clickedEl, reverse = false, id) {
+	function handleRangeResizeDown(e, clickedEl, reverse = false, id) {
 		let clientX = getClientX(e)
-		initClientX = getClientX(e)
+		// initClientX = getClientX(e)
 		createTravelLimits([clickedEl])
 		featureInfoWindow(id)
 		movingEls = [clickedEl]
@@ -316,10 +313,10 @@ export default function ShiftSchedule({
 		resizeStartWidth = clickedEl.offsetWidth
 		currentMouseX = clientX 
 		currentContainerRect = getRect(container.current)
-		setNap({factive: true}, id)
+		setRange({factive: true}, id)
 
-		if (e.touches) handleTouchDrag(resizeNapIntent, releaseNap)
-		else handleClickDrag(resizeNapIntent, releaseNap)
+		if (e.touches) handleTouchDrag(resizeRangeIntent, releaseRange)
+		else handleClickDrag(resizeRangeIntent, releaseRange)
 	}
 
 	/**
@@ -327,7 +324,7 @@ export default function ShiftSchedule({
 	 * @param {array} activeEls 
 	 */
 	function createTravelLimits(activeEls) {
-		const otherEls = napElLookup.map(({el}) => el).filter(el => !activeEls.includes(el))
+		const otherEls = rangeElLookup.map(({el}) => el).filter(el => !activeEls.includes(el))
 
 		limitRect = createLimits(otherEls, activeEls, container.current)
 	}
@@ -362,7 +359,7 @@ export default function ShiftSchedule({
 		})
 	}
 
-	function moveNapIntent(e) {
+	function moveRangeIntent(e) {
 		let clientX = getClientX(e)
 		if (isCollision(clientX)) 
 			{snapToLimit(clientX); return}
@@ -373,7 +370,7 @@ export default function ShiftSchedule({
 		})
 	}
 
-	function resizeNapIntent(e) {
+	function resizeRangeIntent(e) {
 		let clientX = getClientX(e)
 		let delta = clientX - resizeStartX
 		if (reverseResize) delta *= -1
@@ -423,17 +420,17 @@ export default function ShiftSchedule({
 	return (
 		<div className={classNames({'disable-touch-drag': disableTouchDrag}, 'range-slider')}>
 		<div className={classNames({'drag': dragging, 'disable-touch-drag': disableTouchDrag}, 'shifts', 'ui')} ref={container}>
-			{napData.map((child, index) => 
+			{rangeData.map((child, index) => 
 				<Range 
 					fixed={child.fixed}
 					containerRect={containerRect} 
 					getContainerRect={() => getRect(container.current)} 
 					mover={moveElement} 
 					sizer={resizeElement}
-					downHandler={handleNapDown} 
-					resizeDownHandler={handleNapResizeDown}
-					showInfo={showInfo}
-					ref={(element) => napEls.current.push(element)} 
+					downHandler={handleRangeDown} 
+					resizeDownHandler={handleRangeResizeDown}
+					showInfo={userShowInfo}
+					ref={(element) => rangeEls.current.push(element)} 
 					key={child.id}
 					currentBounds={child.currentBounds}
 					timeRange={myRange}
@@ -443,7 +440,7 @@ export default function ShiftSchedule({
 			)}
 
 			{typeof gradiation === 'number' || 'string' &&
-				<Gradiation interval={gradiation} units={myUnit} range={myRange} />
+				<Grades interval={gradiation} units={myUnit} range={myRange} />
 			}
 
 			{typeof gradiation === 'object' &&
@@ -456,16 +453,16 @@ export default function ShiftSchedule({
 
 		{showInfo &&
 		<DataPanel 
-			spanData={napData} 
+			rangeData={rangeData} 
 			units={myUnit} 
 			range={myRange}
 			getContainerRect={() => getRect(container.current)}
-			updateData={setNap}
-			deleteData={removeNap}
-			newSpan={addNap}
+			updateData={setRange}
+			deleteData={removeRange}
+			newSpan={addRange}
 			maxItems={maxItems}
-			addMore={addMore}
-			changeColor={changeColor}
+			addMore={userAddMore}
+			changeColor={userChangeColor}
 			activeInfoWindow={activeInfoWindow} 
 			setActiveInfoWindow={setActiveInfoWindow} />}
 

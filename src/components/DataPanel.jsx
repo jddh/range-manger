@@ -3,7 +3,7 @@ import { getRect } from '../functions/geometry'
 import classNames from 'classnames'
 import * as Units from '../functions/units'
 
-export default function DataPanel ({spanData, units, range, updateData, deleteData, newSpan, maxItems, addMore, activeInfoWindow, getContainerRect, setActiveInfoWindow, changeColor}) {
+export default function DataPanel ({rangeData, units, range, updateData, deleteData, newSpan, maxItems, addMore, activeInfoWindow, getContainerRect, setActiveInfoWindow, changeColor}) {
 
 	const activePanelRef = useRef(null)
 
@@ -26,7 +26,7 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 	Units.setUnit(units)
 	Units.setRange(range)
 
-	//TODO if any nap can have fixed values, all the handlers need to account for which edges are available for resize
+	//TODO if any range can have fixed values, all the handlers need to account for which edges are available for resize
 	function handleStartChange(e, spanNode) {
 		updateData({x: Units.getPercentFromUnit(e.target.value, range, 'point')}, spanNode.id)
 	}
@@ -36,8 +36,8 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 	}
 
 	const handleIntervalChange = (e, index) => {
-		const child = spanData[index]
-		const sibling =  spanData[index + 1]
+		const child = rangeData[index]
+		const sibling =  rangeData[index + 1]
 		const distance = Units.getPercentFromUnit(e.target.value, range, 'minutes')
 		if (sibling.fixed == 'right') {
 			const currentX = sibling.x
@@ -74,8 +74,8 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 
 	//render
 	let intervals = []	//if given child has a sibling, show interval field
-	spanData.forEach((child, index) => {
-		if (spanData[index+1]) intervals[index] = true
+	rangeData.forEach((child, index) => {
+		if (rangeData[index+1]) intervals[index] = true
 	})
 	const unitFieldType = (units == 'time') ? 'time' : 'number'
 	const unitStep = (units == 'time') ? "1" : (range[1] - range[0]) / 1000
@@ -84,12 +84,12 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 
 	let showWindow
 	if (activeInfoWindow)
-		showWindow = spanData.map(child => activeInfoWindow[0] == child.id)	
+		showWindow = rangeData.map(child => activeInfoWindow[0] == child.id)	
 	else showWindow = []
 
 	return (
 		<div className="data-panels">
-			{spanData.map((child, index) => 
+			{rangeData.map((child, index) => 
 				<div
 					ref={showWindow[index] ? activePanelRef : null}
 					className={classNames({active: showWindow[index]}, 'data-panel')} 
@@ -114,7 +114,7 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 
 					{intervals[index] && 
 						<div className='fieldset'>
-						<label > interval </label><input className='output' value={Units.getUnitAmount((spanData[index+1].x) - (child.x + child.size))} onChange={e => handleIntervalChange(e, index)} type="number" />
+						<label > interval </label><input className='output' value={Units.getUnitAmount((rangeData[index+1].x) - (child.x + child.size))} onChange={e => handleIntervalChange(e, index)} type="number" />
 						</div>}
 
 					<div className='fieldset'>
@@ -139,7 +139,7 @@ export default function DataPanel ({spanData, units, range, updateData, deleteDa
 
 			{addMore && 
 			<div className="meta-controls">
-				<button className="add" disabled={spanData.length >= maxItems} onClick={newSpan}>add</button>
+				<button className="add" disabled={rangeData.length >= maxItems} onClick={newSpan}>add</button>
 			</div>}
 		</div>
 	)
