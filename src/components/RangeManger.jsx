@@ -11,7 +11,7 @@ import handleTouchDrag from '../functions/handleTouchDrag'
 import {createLimits, getRect, createAggregateDimensions, gridSnap} from '../functions/geometry'
 import * as Units from '../functions/units'
 import { hexToRgb, arraysEqual, convertToBooleanVars } from '../functions/utilities'
-import './RangeSlider.css'
+import './RangeManger.css'
 
 function getOffsets(els, e) {
 	const clientX = getClientX(e)

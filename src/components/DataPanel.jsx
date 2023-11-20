@@ -32,13 +32,15 @@ export default function DataPanel ({rangeData, units, range, updateData, deleteD
 	}
 
 	function handleLengthChange(e, spanNode) {
-		updateData({size: Units.getPercentFromUnit(e.target.value, range, 'minutes')}, spanNode.id)
+		updateData({size: Units.getPercentFromUnit(e.target.value, range, 'range')}, spanNode.id)
 	}
 
 	const handleIntervalChange = (e, index) => {
 		const child = rangeData[index]
 		const sibling =  rangeData[index + 1]
 		const distance = Units.getPercentFromUnit(e.target.value, range, 'minutes')
+		//BUG this wiggles the right bound, whereas core resize does not
+		//BUG no collision
 		if (sibling.fixed == 'right') {
 			const currentX = sibling.x
 			const newX = (child.x + child.size) + distance
