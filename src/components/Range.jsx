@@ -21,7 +21,7 @@ function getPerc(px, total, style = '') {
 
 const Range = forwardRef(function (
 	{
-		fixed, className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, showInfo, id, factive, currentBounds, timeRange, units, pxGrid, color, name, toggleInfoWindow
+		fixed, className, x , size, containerRect, getContainerRect, mover, sizer, downHandler, resizeDownHandler, showInfo, id, factive, currentBounds, gamut, units, pxGrid, color, name, toggleInfoWindow, showTitles
 	}, ref) {
 	const element = useRef(null)
 	useImperativeHandle(ref, () => ({getBounds: getBounds, el: element.current, id: id}))
@@ -32,7 +32,7 @@ const Range = forwardRef(function (
 	const hslColour = useMemo(() => hexToHSL(color, -10), [color])
 
 	Units.setUnit(units)
-	Units.setRange(timeRange)
+	Units.setGamut(gamut)
 
 	const adjustedX = x
 
@@ -103,7 +103,7 @@ const Range = forwardRef(function (
 				'--base-bg-hsl': hslColour
 			}}>
 
-			<div className="label">{name}</div>
+			{showTitles && <div className="label">{name}</div>}
 
 			{leftHandle &&
 				<ResizeHandle downHandler={resizeDownHandler} mover={mover} sizer={sizer} parent={element.current} id={id} reverse/>

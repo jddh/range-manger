@@ -3,7 +3,7 @@ import * as Units from '../functions/units'
 export default function Grades({units, range, interval}) {
 	
 	Units.setUnit(units)
-	Units.setRange(range)
+	Units.setGamut(range)
 
 	const absIntervalPercentage = Units.getPercentFromUnit(interval, [0,100], 'minutes')
 	const intervalPercentage = Units.getPercentFromUnit(interval, range, 'minutes')

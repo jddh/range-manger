@@ -55,11 +55,12 @@ The `<Range />` component can be used as many times as you like inside of `<Rang
 | disableTouchDrag | `true` | If `true`, the viewport's scrolling is disabled while touch events are happening on the component
 | maxItems | `5` | A limit to the insanity of infinite ranges (eventually they will be too small to be useful)
 | units | `"time"` | `"time" || "numerical"` |
-| range | `['700','2100']` | `[min,max]` either 24-hr clock values or numbers
+| gamut | `['700','2100']` | `[min,max]` either 24-hr clock values or numbers
 | gradiation | `120` | An integer of space between optical gradiation, either numbers or minutes, depending on your `units` prop
 | changeColor | `true` | Allow colouring of individual ranges
 | addMore | `true` | Show the "add" button to add more ranges
 | showInfo | `true` | Allow click on ranges to change their parameters
+| showTitles | `true` | Show titles for each range
 | localStoreData | `true` | Persist changes in localStorage
 
 ## &lt;Range /&gt;

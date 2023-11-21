@@ -4,7 +4,7 @@ export default function Grade({units, range, value}) {
 	let rangeValues = [], n = 0
 
 	Units.setUnit(units)
-	Units.setRange(range)
+	Units.setGamut(range)
 
 	const percentValue = Units.getPercentFromUnit(value, range, 'point')
 

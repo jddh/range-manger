@@ -14,14 +14,15 @@ function App() {
 			<RangeManger 
 				// units="time"
 				// units="numerical"
-				// range={['900', '1800']}
-				// range={['50', '1500']}
+				// gamut={['900', '1800']}
+				// gamut={['50', '1500']}
 				// gradiation={['400', '1100']}
 				gradiation='120'
 				// changeColor='false'
 				// addMore='false'
 				// showInfo="false"
 				// localStoreData='false'
+				// showTitles='false'
 				onChange={iChanged}>
 
 				<Range
@@ -34,10 +35,10 @@ function App() {
 					className="second"
 					x="40"
 					size="10"
-					color="#000000"
+					color="#32a976"
 				/>
 				<Range 
-					className="second"
+					title="hihi"
 					x="60"
 					size="10"
 				/>

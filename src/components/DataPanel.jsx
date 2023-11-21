@@ -3,7 +3,7 @@ import { getRect } from '../functions/geometry'
 import classNames from 'classnames'
 import * as Units from '../functions/units'
 
-export default function DataPanel ({rangeData, units, range, updateData, deleteData, newSpan, maxItems, addMore, activeInfoWindow, getContainerRect, setActiveInfoWindow, changeColor, transformRange}) {
+export default function DataPanel ({rangeData, units, gamut, updateData, deleteData, addRange, maxItems, addMore, activeInfoWindow, getContainerRect, setActiveInfoWindow, changeColor, transformRange}) {
 
 	const activePanelRef = useRef(null)
 
@@ -24,34 +24,19 @@ export default function DataPanel ({rangeData, units, range, updateData, deleteD
 	}, [activeInfoWindow])
 
 	Units.setUnit(units)
-	Units.setRange(range)
+	Units.setGamut(gamut)
 
-	//TODO if any range can have fixed values, all the handlers need to account for which edges are available for resize
 	function handleStartChange(e, spanNode) {
 		transformRange({x: e.target.value}, 'start', spanNode.id)
-		// updateData({x: Units.getPercentFromUnit(e.target.value, range, 'point')}, spanNode.id)
 	}
 
 	function handleLengthChange(e, spanNode) {
 		transformRange({size: e.target.value}, 'resize', spanNode.id)
-		// updateData({size: Units.getPercentFromUnit(e.target.value, range, 'range')}, spanNode.id)
 	}
 
 	const handleIntervalChange = (e, index) => {
 		const child = rangeData[index]
 		const sibling =  rangeData[index + 1]
-		// const distance = Units.getPercentFromUnit(e.target.value, range, 'minutes')
-		// if (sibling.fixed == 'right') {
-		// 	const currentX = sibling.x
-		// 	const newX = (child.x + child.size) + distance
-		// 	const delta = currentX - newX
-		// 	const newSize = sibling.size + delta
-		// 	updateData({x: newX, size: newSize}, sibling.id)
-		// }
-		// else {
-		// 	const newX = (child.x + child.size) + distance
-		// 	updateData({x: newX}, sibling.id)
-		// }
 
 		transformRange({distance: e.target.value, width: child.x+child.size}, 'interval', sibling.id)
 	}
@@ -82,7 +67,7 @@ export default function DataPanel ({rangeData, units, range, updateData, deleteD
 		if (rangeData[index+1]) intervals[index] = true
 	})
 	const unitFieldType = (units == 'time') ? 'time' : 'number'
-	const unitStep = (units == 'time') ? "1" : (range[1] - range[0]) / 1000
+	const unitStep = (units == 'time') ? "1" : (gamut[1] - gamut[0]) / 1000
 	const fixedLabels = ['No', 'Left', 'Right', 'Both']
 	const fixedValues = ['', 'left', 'right', 'both']
 
@@ -106,7 +91,7 @@ export default function DataPanel ({rangeData, units, range, updateData, deleteD
 
 					<div className='fieldset'>
 						<label >start </label>
-						<input className='output' value={Units.getUnitValue(child.x,range,24)} onChange={e => handleStartChange(e, child)} type={unitFieldType} step={unitStep}  />
+						<input className='output' value={Units.getUnitValue(child.x,gamut,24)} onChange={e => handleStartChange(e, child)} type={unitFieldType} step={unitStep}  />
 					</div>
 
 					<div className='fieldset'>
@@ -143,7 +128,7 @@ export default function DataPanel ({rangeData, units, range, updateData, deleteD
 
 			{addMore && 
 			<div className="meta-controls">
-				<button className="add" disabled={rangeData.length >= maxItems} onClick={newSpan}>add</button>
+				<button className="add" disabled={rangeData.length >= maxItems} onClick={addRange}>add</button>
 			</div>}
 		</div>
 	)

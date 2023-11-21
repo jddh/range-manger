@@ -173,6 +173,7 @@ body {
 	& span {
 		position: absolute;
 		top: -1.5em;
+		min-width: 4em;
 	}
 
 	&:after {
@@ -326,6 +327,7 @@ button {
 	padding: .4em;
 	border-radius: .5em;
 	border: 1px solid currentColor;
+	color: darkslategray;
 	cursor: pointer;
 }
 

@@ -53,18 +53,19 @@ export default function RangeManger({
 		disableTouchDrag = true,
 		maxItems = 5,
 		units = 'time', 
-		range = ['700','2100'],
+		gamut = ['700','2100'],
 		gradiation = 120,
 		changeColor = true,
 		addMore = true,
 		showInfo = true,
 		localStoreData = true,
+		showTitles = true,
 		pxGrid = .2,
 		onChange,
 		children
 	}) {
 
-	const [userChangeColor, userAddMore, userShowInfo, userLocalStoreData] = convertToBooleanVars(changeColor, addMore, showInfo, localStoreData)
+	const [userChangeColor, userAddMore, userShowInfo, userLocalStoreData, userShowTitles] = convertToBooleanVars(changeColor, addMore, showInfo, localStoreData, showTitles)
 
 	const container = useRef(null)
 	//raw storage for backrefs
@@ -94,10 +95,10 @@ export default function RangeManger({
 	//set time range of container
 	const myUnit = units
 	Units.setUnit(myUnit)
-	const myRange = units == 'time' ? 
-		[Units.getPercentFromUnit(range[0],[0,100], 'point'), Units.getPercentFromUnit(range[1],[0,100], 'point')] 
-		: [parseInt(range[0]), parseInt(range[1])]
-	Units.setRange(myRange)
+	const userGamut = units == 'time' ? 
+		[Units.getPercentFromUnit(gamut[0],[0,100], 'point'), Units.getPercentFromUnit(gamut[1],[0,100], 'point')] 
+		: [parseInt(gamut[0]), parseInt(gamut[1])]
+	Units.setGamut(userGamut)
 
 	useEffect(function() {
 		//create data from component children
@@ -115,7 +116,7 @@ export default function RangeManger({
 				...c.props,
 				x: parseInt(c.props.x),
 				size: parseInt(c.props.size),
-				name: `Span ${i+1}`
+				name: c.props.title || `Span ${i+1}`
 				}
 
 			if (rangeData && rangeData[i]) formattedChild = {...formattedChild, ...rangeData[i], factive: false}
@@ -272,7 +273,6 @@ export default function RangeManger({
 	function releaseRange(e) {
 		let rangesToUpdate = []
 		//if cursor has actually moved
-		//TODO touch needs a bigger null zone
 		if (e.clientX ) {
 		activeIDs.forEach(id => {
 			const bounds = getRangeRef(id).getBounds()
@@ -349,11 +349,9 @@ export default function RangeManger({
 		const rightEdge = {x: 100, right: 100}
 		const thisNode = nodes[thisIndex]
 		const sibNode = nodes[thisIndex + 1] || rightEdge
-		// const sibsibNode = nodes[thisIndex + 2] || rightEdge
 		const preNode = (thisIndex > 0) ? nodes[thisIndex-1] : {x:0,right:0, size: 0}
 		thisNode.right = thisNode.x + thisNode.size
 		sibNode.right = sibNode.x + sibNode.size
-		// sibsibNode.right = sibsibNode.x + sibsibNode.size
 		preNode.right = preNode.x + preNode.size
 		/**
 		 * 1. increase size && sibling block
@@ -437,24 +435,23 @@ export default function RangeManger({
 	}
 
 	function transformRange(transforms, action, id) {
-	// currentContainerRect = getRect(container.current)
 	const range = getRange(id)
 	let direction
 	switch(action) {
 		case 'resize':
-			const newSize = Units.getPercentFromUnit(transforms.size, myRange, 'range')
+			const newSize = Units.getPercentFromUnit(transforms.size, userGamut, 'range')
 			direction = newSize - range.size
 			if (!isDataCollision({size: newSize}, direction, action, id))
 				setRange({size: newSize}, id)
 		break
 		case 'start':
-			const newX = Units.getPercentFromUnit(transforms.x, myRange, 'point')
+			const newX = Units.getPercentFromUnit(transforms.x, userGamut, 'point')
 			direction = newX - range.x
 			if (!isDataCollision({x: newX}, direction, action, id))
 				setRange({x: newX}, id)
 		break
 		case 'interval':
-			const newDistance = Units.getPercentFromUnit(transforms.distance, myRange, 'range')
+			const newDistance = Units.getPercentFromUnit(transforms.distance, userGamut, 'range')
 			const newSiblingX = transforms.width + newDistance
 			direction = newSiblingX - range.x
 			if (!isDataCollision({x: newSiblingX}, direction, action, id))
@@ -508,8 +505,9 @@ export default function RangeManger({
 					showInfo={userShowInfo}
 					ref={(element) => rangeEls.current.push(element)} 
 					key={child.id}
+					showTitles={userShowTitles}
 					currentBounds={child.currentBounds}
-					timeRange={myRange}
+					gamut={userGamut}
 					units={myUnit}
 					pxGrid={pxGrid}
 					toggleInfoWindow={toggleInfoWindow}
@@ -517,12 +515,12 @@ export default function RangeManger({
 			)}
 
 			{typeof gradiation === 'number' || 'string' &&
-				<Grades interval={gradiation} units={myUnit} range={myRange} />
+				<Grades interval={gradiation} units={myUnit} range={userGamut} />
 			}
 
 			{typeof gradiation === 'object' &&
 				gradiation.map((g,i) =>
-					<Grade value={g} units={myUnit} range={myRange} key={i}/>
+					<Grade value={g} units={myUnit} range={userGamut} key={i}/>
 			)}
 		</div>
 
@@ -532,12 +530,12 @@ export default function RangeManger({
 		<DataPanel 
 			rangeData={rangeData} 
 			units={myUnit} 
-			range={myRange}
+			gamut={userGamut}
 			getContainerRect={() => getRect(container.current)}
 			updateData={setRange}
 			deleteData={removeRange}
 			transformRange={transformRange}
-			newSpan={addRange}
+			addRange={addRange}
 			maxItems={maxItems}
 			addMore={userAddMore}
 			changeColor={userChangeColor}
