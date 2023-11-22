@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import { resolve } from 'path'
 import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
@@ -20,4 +21,13 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '',
   plugins: [react()],
+  build: {
+    lib: {
+      entry: resolve(__dirname, 'src/components/RangeManger.jsx'),
+      formats: ['es']
+    },
+    rollupOptions: {
+      external: ['react', 'react/jsx-runtime', 'classnames', 'clsx', 'short-unique-id'],
+    }
+  }
 })
