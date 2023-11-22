@@ -13,6 +13,8 @@ import * as Units from '../functions/units'
 import { hexToRgb, arraysEqual, convertToBooleanVars } from '../functions/utilities'
 import './RangeManger.css'
 
+//TODO: demo and test dir
+
 function getOffsets(els, e) {
 	const clientX = getClientX(e)
 	const offsets = els.map(el => clientX - createAggregateDimensions([el]).left)
@@ -47,7 +49,7 @@ function sortXAsc(array) {
 
 const uid = new ShortUniqueId({ length: 10 })
 
-const defaultRangeProps = {color: '#96D3FF'}
+const defaultRangeProps = {color: '#96D3FF', x: '0', size: '10'}
 
 export default function RangeManger({
 		disableTouchDrag = true,
@@ -109,26 +111,27 @@ export default function RangeManger({
 		}
 
 		//if there's no saved data, build ranges from children
-		const items = Children.map(children, (c, i) => {
+		let items = Children.map(children, (c, i) => {
 			let formattedChild = {
 				id: uid.rnd(),
 				...defaultRangeProps,
 				...c.props,
-				x: parseInt(c.props.x),
-				size: parseInt(c.props.size),
+				x: parseInt(c.props.x) || defaultRangeProps.x,
+				size: parseInt(c.props.size) || defaultRangeProps.size,
 				name: c.props.title || `Span ${i+1}`
 				}
 
 			if (rangeData && rangeData[i]) formattedChild = {...formattedChild, ...rangeData[i], factive: false}
 			return formattedChild
 		})
-
-		sortXAsc(items)
+		if (Children.length) sortXAsc(items)
+		else items = []
 
 		setRangeData(items) 
 	}, [])
 
 	useEffect(() => {
+		if (!rangeData) return
 		//prevent possible disconnection of back-refs
 		if (rangeEls.current.length && rangeData?.length) updateRefs()
 
@@ -205,24 +208,26 @@ export default function RangeManger({
 		setRangeData(data)
 	}
 
-	function addRange({x, size = 10, fixed}) {
+	function addRange({x = 0, size = 10, fixed}) {
 
-		//pick largest gap
-		const gaps = rangeData.map((n,i) => {
-			if (i == 0) return 0
-			return {i: i-1, gap: n.x - (rangeData[i-1].x + rangeData[i-1].size)}
-		}).filter(n => n)
-		.sort((a,b) => a.gap < b.gap ? 1 : -1)
-		//if there is more than one nap
-		if (gaps.length > 1) {
-			const gap = gaps[0]
-			x = rangeData[gap.i].x + rangeData[gap.i].size + 1
-			if (gap.gap < 10) size = gap.gap - 4
-		} else {
-			const gap = rangeData[0]
-			x = gap.x < 50 ?
-				gap.x + gap.size + 1 :
-				gap.x - size - 1
+		if (rangeData.length) {
+			//pick largest gap
+			const gaps = rangeData.map((n,i) => {
+				if (i == 0) return 0
+				return {i: i-1, gap: n.x - (rangeData[i-1].x + rangeData[i-1].size)}
+			}).filter(n => n)
+			.sort((a,b) => a.gap < b.gap ? 1 : -1)
+			//if there is more than one nap
+			if (gaps.length > 1) {
+				const gap = gaps[0]
+				x = rangeData[gap.i].x + rangeData[gap.i].size + 1
+				if (gap.gap < 10) size = gap.gap - 4
+			} else {
+				const gap = rangeData[0]
+				x = gap.x < 50 ?
+					gap.x + gap.size + 1 :
+					gap.x - size - 1
+			}
 		}
 
 		let newRanges = [...rangeData]
@@ -490,6 +495,7 @@ export default function RangeManger({
 			setActiveInfoWindow()
 	}
 
+	//TODO whahappen to gradiation?
 	return (
 		<div className={classNames({'disable-touch-drag': disableTouchDrag}, 'range-slider')}>
 		<div className={classNames({'drag': dragging, 'disable-touch-drag': disableTouchDrag}, 'shifts', 'ui')} ref={container}>
@@ -546,3 +552,5 @@ export default function RangeManger({
 		</div>
 	)
 }
+
+export {Range}

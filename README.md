@@ -66,7 +66,7 @@ The `<Range />` component can be used as many times as you like inside of `<Rang
 ## &lt;Range /&gt;
 | Name | Default | Description |
 | --- | --- | --- |
-| x | `null` | The x-value of the range's left bound, expressed as a percentage float out of 100, eg. `x="42.2"`
+| x | `0` | The x-value of the range's left bound, expressed as a percentage float out of 100, eg. `x="42.2"`
 | size | `10` | The length of the range, expressed as a percentage float out of 100
 | fixed | `null` | Lock down the sides of a range to prevent it from being resized. `"left" || "right" || "both"` |
 | color | `null` | CSS hex
