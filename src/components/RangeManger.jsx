@@ -209,35 +209,41 @@ export default function RangeManger({
 	}
 
 	function addRange({x = 0, size = 10, fixed}) {
-
+		currentContainerRect = getRect(container.current)
 		if (rangeData.length) {
 			//pick largest gap
-			const gaps = rangeData.map((n,i) => {
-				if (i == 0) return 0
-				return {i: i-1, gap: n.x - (rangeData[i-1].x + rangeData[i-1].size)}
-			}).filter(n => n)
-			.sort((a,b) => a.gap < b.gap ? 1 : -1)
-			//if there is more than one nap
+			const lastRangeIndex = rangeData.length-1
+			const gaps = rangeData.slice(1).map((n,i) => {
+				return [(rangeData[i].x + rangeData[i].size), rangeData[i+1].x]
+			})
+			gaps.push([0, rangeData[0].x],
+			[rangeData[lastRangeIndex].x + rangeData[lastRangeIndex].size, 100])
+
+			gaps.sort((a,b) => (b[1]-b[0]) - (a[1]-a[0]))
+			//if there is more than one range
 			if (gaps.length > 1) {
+				let candidate
 				const gap = gaps[0]
-				x = rangeData[gap.i].x + rangeData[gap.i].size + 1
-				if (gap.gap < 10) size = gap.gap - 4
+				x = gap[0] + 1
+				size = Math.min(size, (gap[1]-gap[0]) - 1)
 			} else {
 				const gap = rangeData[0]
 				x = gap.x < 50 ?
 					gap.x + gap.size + 1 :
 					gap.x - size - 1
 			}
+			//TODO feedback on unusable result
+			if (size < 3) return
 		}
 
 		let newRanges = [...rangeData]
 		newRanges.push({
+			...defaultRangeProps,
 			x: x, 
 			size: size, 
 			fixed: fixed, 
 			name: `Span ${rangeData.length+1}`,
-			id: uid.rnd(),
-			...defaultRangeProps
+			id: uid.rnd()
 		})
 		sortXAsc(newRanges)
 		setRangeData(newRanges)
