@@ -20,6 +20,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   base: '',
+  // root: './dev',
   plugins: [react()],
   build: {
     lib: {

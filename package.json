@@ -10,8 +10,10 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
+    "build:demo": "vite build --config vite-demo.config.js && mv dist-demo/demo/index.html dist-demo",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "preview:demo": "vite preview --config vite-demo.config.js",
     "test": "vitest"
   },
   "dependencies": {

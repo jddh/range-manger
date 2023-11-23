@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './App.css'
-import RangeManger from './components/RangeManger'
-import Range from './components/Range'
+import RangeManger, {Range} from '../src/components/RangeManger'
+// import Range from './components/Range'
 
 function iChanged(data) {
 	// console.log('a change: ', data);
@@ -21,11 +21,11 @@ function App() {
 				// changeColor='false'
 				// addMore='false'
 				// showInfo="false"
-				// localStoreData='false'
+				localStoreData='false'
 				// showTitles='false'
 				onChange={iChanged}>
 
-				<Range
+				{/* <Range
 					className="first"
 					x="0"
 					size="10"
@@ -41,12 +41,13 @@ function App() {
 					title="hihi"
 					x="60"
 					size="10"
+					color="#000000"
 				/>
 				<Range
 					x="90"
 					size="10"
 					fixed="right"
-				/>
+				/> */}
 			</RangeManger>
 		</>
 	)
