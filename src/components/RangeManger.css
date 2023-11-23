@@ -173,7 +173,8 @@ body {
 	& span {
 		position: absolute;
 		top: -1.5em;
-		min-width: 4em;
+		left: -0.5em;
+		min-width: 4.5em;
 	}
 
 	&:after {

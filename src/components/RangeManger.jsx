@@ -13,7 +13,7 @@ import * as Units from '../functions/units'
 import { hexToRgb, arraysEqual, convertToBooleanVars } from '../functions/utilities'
 import './RangeManger.css'
 
-//TODO: demo and test dir
+//TODO: CSS processing
 
 function getOffsets(els, e) {
 	const clientX = getClientX(e)
@@ -49,7 +49,7 @@ function sortXAsc(array) {
 
 const uid = new ShortUniqueId({ length: 10 })
 
-const defaultRangeProps = {color: '#96D3FF', x: '0', size: '10'}
+const defaultRangeProps = {color: '#96D3FF', x: 0, size: 10}
 
 export default function RangeManger({
 		disableTouchDrag = true,
@@ -63,6 +63,7 @@ export default function RangeManger({
 		localStoreData = true,
 		showTitles = true,
 		pxGrid = .2,
+		minRangeSize = 40,
 		onChange,
 		children
 	}) {
@@ -124,7 +125,7 @@ export default function RangeManger({
 			if (rangeData && rangeData[i]) formattedChild = {...formattedChild, ...rangeData[i], factive: false}
 			return formattedChild
 		})
-		if (Children.length) sortXAsc(items)
+		if (Children.count(children)) sortXAsc(items)
 		else items = []
 
 		setRangeData(items) 
@@ -213,9 +214,9 @@ export default function RangeManger({
 		if (rangeData.length) {
 			//pick largest gap
 			const lastRangeIndex = rangeData.length-1
-			const gaps = rangeData.slice(1).map((n,i) => {
-				return [(rangeData[i].x + rangeData[i].size), rangeData[i+1].x]
-			})
+			const gaps = rangeData.slice(1).map((n,i) => 
+				[(rangeData[i].x + rangeData[i].size), rangeData[i+1].x]
+			)
 			gaps.push([0, rangeData[0].x],
 			[rangeData[lastRangeIndex].x + rangeData[lastRangeIndex].size, 100])
 
@@ -347,7 +348,7 @@ export default function RangeManger({
 		if (mouseX) mouseIntent = mouseX - currentMouseX	// +1 for right
 		else mouseIntent = intent
 		if (rect.right + mouseIntent >= limitRect.right && mouseIntent > 0)
-			return 'right';
+			return 'right'
 		if(rect.left + mouseIntent <= limitRect.left && mouseIntent < 0)
 			return 'left'
 		else return false
@@ -421,6 +422,7 @@ export default function RangeManger({
 			snapToLimit(clientX, 'resize')
 			return
 		}
+		if (resizeStartWidth + delta <= minRangeSize) return
 		const reverseMotion = reverseResize ? clientX - currentMouseX : false
 		currentMouseX = clientX
 
@@ -446,12 +448,15 @@ export default function RangeManger({
 	}
 
 	function transformRange(transforms, action, id) {
+	currentContainerRect = getRect(container.current)
 	const range = getRange(id)
 	let direction
 	switch(action) {
 		case 'resize':
 			const newSize = Units.getPercentFromUnit(transforms.size, userGamut, 'range')
 			direction = newSize - range.size
+			const newSizePx = (newSize/100) * currentContainerRect.width
+			if (newSizePx <= minRangeSize) return
 			if (!isDataCollision({size: newSize}, direction, action, id))
 				setRange({size: newSize}, id)
 		break
@@ -501,7 +506,6 @@ export default function RangeManger({
 			setActiveInfoWindow()
 	}
 
-	//TODO whahappen to gradiation?
 	return (
 		<div className={classNames({'disable-touch-drag': disableTouchDrag}, 'range-slider')}>
 		<div className={classNames({'drag': dragging, 'disable-touch-drag': disableTouchDrag}, 'shifts', 'ui')} ref={container}>
