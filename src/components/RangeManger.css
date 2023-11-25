@@ -1,6 +1,5 @@
 :root {
-	--ui-border: #C0C0C0;
-	font-size: 16px;
+	
 }
 
 body {
@@ -16,8 +15,7 @@ body {
 	display: flex;
 	height: 100px;
 	margin: 0 auto;
-	border: 1px solid var(--ui-border);
-	background-color: #FAFAFA;
+	
 
 	.disable-touch-drag & {
 		touch-action: none;
@@ -36,13 +34,10 @@ body {
 	box-sizing: border-box;
 	width: 100px;
 	height: 100%;
-	/* margin: 0 3px; */
 	position: absolute;
 	z-index: 2;
 	top: 0;
-	/* transform: translateX(-50%); */
-	border: 1px solid rgba(var(--base-bg-color), .85);
-	background-color: rgba(var(--base-bg-color), .46);
+	border: 1px solid currentColor;
 	cursor: grab;
 
 	&.second {
@@ -55,32 +50,19 @@ body {
 
 	& button {
 		position: relative;
-		--size: 60px;
-		top: calc(50% - var(--size)/4);
-		width: calc(var(--size)/2);
-		height: calc(var(--size)/2);
-		border-radius: 50%;
-		font-size: 0;
-		background-color: rgba(var(--base-bg-color), .55);
-		border: none;
+		
 		/* visibility: hidden; */
 
 		&:after {
-			content: 'III';
-			display: inline-block;
-			font-size: 1rem;
-			font-family: Helvetica, Verdana;
-			color: white;
-			transform: rotate(.25turn)
+			
 		}
 
 		&:active, &:focus {
-			border: none;
-			outline: none;
+			
 		}
 
 		&:active {
-			background-color: rgb(var(--base-bg-color));
+			
 		}
 	}
 
@@ -90,19 +72,16 @@ body {
 
 	@media (hover: hover) {
 		& button {
-			visibility: hidden;
+			
 		}
 		&:hover button {
-			visibility: visible;
+			
 		}
 	}
 
 	.label {
 		position: absolute;
-		left: 3px;
-		font-size: 0.69em;
-		/* color: rgba(var(--base-bg-color), 1); */
-		color: hsl(var(--base-bg-hsl));
+		
 	}
 
 	.active-label {
@@ -111,10 +90,7 @@ body {
 		z-index: 3;
 		left: -50px;
 		top: 40%;
-		padding: 2px 5px;
-		font-size: .7em;
-		background-color: #4A4A4A;
-		color: white;
+		
 
 		&.size {
 			left: 44%;
@@ -128,7 +104,7 @@ body {
 	}
 
 	&.active {
-		background-color: rgba(var(--base-bg-color), .7);
+		
 		z-index: 3;
 
 		.active-label {
@@ -144,21 +120,11 @@ body {
 		cursor: col-resize;
 	
 		&:after {
-			position: absolute;
-			z-index: 1;
-			top: calc(50% - 8px);
-			left: 3px;
-			content: '';
-			display: block;
-			width: 2px;
-			height: 16px;
-			border-radius: 4px;
-			background-color: rgba(var(--base-bg-color), 1);
+			
 		}
 
 		&.last:after {
-			left: auto;
-			right: 3px;
+			
 		}
 	}
 }
@@ -167,8 +133,7 @@ body {
 	position: absolute;
 	z-index: 1;
 	height: 100%;
-	color: lightgrey;
-	font-size: 0.69em;
+	
 
 	& span {
 		position: absolute;
@@ -183,7 +148,7 @@ body {
 		left: 0;
 		height: 100%;
 		width: 1px;
-		background-color: #E2E2E2;
+		background-color: currentColor;
 	}
 }
 
@@ -196,24 +161,13 @@ body {
 	/* margin-top: 10px; */
 	padding: .2em;
 	cursor: grab;
-	font-size: 0;
 
 	.disable-touch-drag & {
 		touch-action: none;
 	}
 
 	&:after {
-		/* position: absolute; */
-		/* z-index: 1; */
-		/* top: calc(50% - 8px); */
-		/* left: 3px; */
-		content: '';
-		display: inline-block;
-		margin-top: 13px;
-		width: 30px;
-		height: 5px;
-		border-radius: 4px;
-		background-color: var(--ui-border);
+		
 	}
 }
 
@@ -228,26 +182,10 @@ body {
 		grid-template-areas: "legend data";
 		grid-auto-rows: auto;
 		flex: 1;
-		/* margin-left: -5.7em; */
-		padding: 13px;
-		text-align: left;
 		visibility: hidden;
-		border-radius: 10px;
-		background-color: white;
-		filter: drop-shadow(0 0 4px rgba(0,0,0,0.2));
-		will-change: filter;
-		/* box-shadow: 0 0 9px rgba(0,0,0,0.2); */
 
 		&:after {
-			content: '';
-			position: absolute;
-			top: -15px;
-			left: calc(50% - 10px);
-			width: 0;
-			height: 0;
-			border-style: solid;
-			border-width: 0 10px 15px 10px;
-			border-color: transparent transparent white transparent;
+			
 		}
 
 		&.active {
@@ -256,40 +194,36 @@ body {
 		}
 
 		& h4 {
-			margin-bottom: .3em;
+			
 		}
 
 		& input {
-			max-width: 8em;
+			
 
 			&[type=number] {
-				/* max-width: 3em; */
+				
 			}
 		}
 
 		& label {
-			font-size: .9em;
+			
 		}
 
 		.fieldset {
 			display: grid;
 			grid-template-columns: subgrid;
 			grid-column: 1/-1;
-			margin: 0 0 5px;
-			padding: 0;
-			border: none;
-
+			
 			& label {
-				/* grid-area: legend; */
+				
 			}
 
 			& input, select {
-				/* grid-area: data; */
+				
 			}
 		}
 
 		.no-label input, button {
-			/* grid-column: legend / data; */
 			grid-column: 1/-1;
 		}
 
@@ -298,26 +232,18 @@ body {
 			top: 2px;
 			right: 2px;
 			grid-column: unset;
-			padding: .1em .4em;
-			border: none;
-			background-color: transparent;
-			font-weight: bold;
+			
 		}
 
 		& button.rm {
-			width: 100%;
-			/* margin-top: 10px; */
-			color: rgb(155, 34, 34);
+			
 		}
 	}
 }
 
 /* forms */
 input, select {
-	padding: .2em;
-	border: 1px solid var(--ui-border);
-	border-radius: .5em;
-	font-size: 0.81em;
+	
 }
 
 input[type=color] {
@@ -325,23 +251,17 @@ input[type=color] {
 }
 
 button {
-	padding: .4em;
-	border-radius: .5em;
-	border: 1px solid currentColor;
-	color: darkslategray;
-	cursor: pointer;
+	
 }
 
 fieldset {
 	& label {
-		font-size: 0.88em;
+		
 	}
 }
 
 
 
 @media screen and (max-height: 450px) {
-	/* button {
-		display: none;
-	} */
+	
 }

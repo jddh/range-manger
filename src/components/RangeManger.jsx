@@ -12,6 +12,7 @@ import {createLimits, getRect, createAggregateDimensions, gridSnap} from '../fun
 import * as Units from '../functions/units'
 import { hexToRgb, arraysEqual, convertToBooleanVars } from '../functions/utilities'
 import './RangeManger.css'
+import './RangeManger-theme.css'
 
 //TODO: CSS processing
 
@@ -49,6 +50,7 @@ function sortXAsc(array) {
 
 const uid = new ShortUniqueId({ length: 10 })
 
+//TODO input prop to override defaults
 const defaultRangeProps = {color: '#96D3FF', x: 0, size: 10}
 
 export default function RangeManger({
@@ -62,13 +64,14 @@ export default function RangeManger({
 		showInfo = true,
 		localStoreData = true,
 		showTitles = true,
+		useTheme = true,
 		pxGrid = .2,
 		minRangeSize = 40,
 		onChange,
 		children
 	}) {
 
-	const [userChangeColor, userAddMore, userShowInfo, userLocalStoreData, userShowTitles] = convertToBooleanVars(changeColor, addMore, showInfo, localStoreData, showTitles)
+	const [userChangeColor, userAddMore, userShowInfo, userLocalStoreData, userShowTitles, userUseTheme] = convertToBooleanVars(changeColor, addMore, showInfo, localStoreData, showTitles, useTheme)
 
 	const container = useRef(null)
 	//raw storage for backrefs
@@ -342,6 +345,12 @@ export default function RangeManger({
 		limitRect = createLimits(otherEls, activeEls, container.current)
 	}
 
+	/**
+	 * determine if any elements collide given pointer intent
+	 * @param {number} mouseX 
+	 * @param {number} intent 
+	 * @returns {boolean|string}
+	 */
 	function isCollision(mouseX, intent) {
 		const rect = createAggregateDimensions(movingEls)
 		let mouseIntent
@@ -354,6 +363,13 @@ export default function RangeManger({
 		else return false
 	}
 
+	/**
+	 * determine if any data ranges collide given pointer intent
+	 * @param {number} direction 
+	 * @param {string} action
+	 * @param {string} id 
+	 * @returns {boolean|string}
+	 */
 	function isDataCollision(data, direction, action, id) {
 		let collide = false
 		const nodes = sortXAsc([...rangeData])
@@ -447,6 +463,13 @@ export default function RangeManger({
 	}
 	}
 
+	/**
+	 * change range props, given unit values
+	 * @param {object} transforms 
+	 * @param {string} action 
+	 * @param {string} id 
+	 */
+	//TODO ensure each step has a sufficient storage-side change so that unit value/visual changes are meaningful
 	function transformRange(transforms, action, id) {
 	currentContainerRect = getRect(container.current)
 	const range = getRange(id)
@@ -507,7 +530,7 @@ export default function RangeManger({
 	}
 
 	return (
-		<div className={classNames({'disable-touch-drag': disableTouchDrag}, 'range-slider')}>
+		<div className={classNames({'disable-touch-drag': disableTouchDrag, theme: userUseTheme}, 'range-slider')}>
 		<div className={classNames({'drag': dragging, 'disable-touch-drag': disableTouchDrag}, 'shifts', 'ui')} ref={container}>
 			{rangeData.map((child, index) => 
 				<Range 
@@ -557,8 +580,6 @@ export default function RangeManger({
 			changeColor={userChangeColor}
 			activeInfoWindow={activeInfoWindow} 
 			setActiveInfoWindow={setActiveInfoWindow} />}
-
-		<button onClick={testButton} style={{marginTop: '50px'}}>push me</button>
 		</div>
 	)
 }

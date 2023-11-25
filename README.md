@@ -61,6 +61,7 @@ The `<Range />` component can be used as many times as you like inside of `<Rang
 | addMore | `true` | Show the "add" button to add more ranges
 | showInfo | `true` | Allow click on ranges to change their parameters
 | showTitles | `true` | Show titles for each range
+| useTheme | `true` | Load default styles to make the manger look nice. Set `false` to roll your own css
 | localStoreData | `true` | Persist changes in localStorage
 
 ## &lt;Range /&gt;
@@ -70,4 +71,4 @@ The `<Range />` component can be used as many times as you like inside of `<Rang
 | size | `10` | The length of the range, expressed as a percentage float out of 100
 | fixed | `null` | Lock down the sides of a range to prevent it from being resized. `"left" || "right" || "both"` |
 | color | `null` | CSS hex
-| className | `null` | Is passed on to the element
+| className, ... | `null` | Additional attributes are passed on as `[...props]`
