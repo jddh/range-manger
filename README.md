@@ -1,6 +1,6 @@
 # RangeManger
 
-RangeSlider, a drop-in React component, is somewhere between `<input type="range" />` and Google Calendar. It's meant for defining multiple one-dimensional ranges with fine-grained controls.
+RangeManger, a drop-in React component, is somewhere between `<input type="range" />` and Google Calendar. It's meant for defining multiple one-dimensional ranges with fine-grained controls.
 
 I made it for tracking my baby's naps, but you do you.
 
@@ -18,10 +18,9 @@ I made it for tracking my baby's naps, but you do you.
 # Usage
 The `<Range />` component can be used as many times as you like inside of `<RangeSlider />` to load the component with prefab ranges:
 
-	import RangeSlider from './components/RangeSlider'
-	import Range from './components/Range'
+	import RangeManger, {Range} from 'range-manger'
 	
-	<RangeSlider>
+	<RangeManger>
 
     <Range
     	className="first"
@@ -44,11 +43,11 @@ The `<Range />` component can be used as many times as you like inside of `<Rang
     	size="10"
     	fixed="right"
     />
-	</RangeSlider>`
+	</RangeManger>`
 	
 
 # Props
-## &lt;RangeSlider /&gt;
+## &lt;RangeManger /&gt;
 | Name | Default | Description |
 | --- | --- | --- |
 | onChange | `null` | The most precious of all. Bind a handlerFunction(data), wherein data will contain everything the component has stored about its range(s). This event fires when range parameters are set on mouseup/touchend/blur; it does *not* fire *while* ranges are being dragged. |

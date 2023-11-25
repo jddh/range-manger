@@ -5,56 +5,124 @@
 
   /* color-scheme: light dark; */
   color: #213547;
-  background-color: #ffffff;
 
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+
+  --cream: #FFFDF5;
+  --teal: #65B9CA;
+  --pink: #DA87B2;
+  --red: #c23b4d;
 }
 
 body {
-  margin: 0;
   display: flex;
   flex-direction: column;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  margin: 0;
+  padding-bottom: 50px;
+  background-color: var(--cream);
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 65px;
   line-height: 1.1;
 }
 
+h2 {
+  font-size: 35px;
+}
+
+.description:before, .description:after, .description-inner:after {
+  position: absolute;
+  left: calc(50% - var(--circle-size)/2);
+  content: '';
+  display: block;
+  width: var(--circle-size);
+  height: var(--circle-size);
+  border-width: 7px;
+  border-style: solid;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+}
+
 .description {
-  flex: 1;
+  --circle-size: 302px;
+  position: relative;
+  /* flex: 1; */
   display: flex;
   flex-direction: column;
   justify-content: center;
+  max-width: 550px;
   margin: 0 2em;
+  padding: calc(var(--circle-size) * .79) 0 40px;
 
-  & h1 {
-    margin: .25em 0;
-  }
-
-  & h1, h2 {
+  & h1, h2, p {
     text-align: center;
   }
+
+  &:after {
+    top: calc(var(--circle-size) / 1.5);
+    border-color:#c23b4d;
+  }
+  &:before {
+    top: calc(var(--circle-size) / 2.6);
+    border-color: #DA87B2;
+  }
+
+  & h1 {
+    margin: 0;
+  }
+
+  & h2 {
+    margin-top: calc(var(--circle-size) * .85);
+  }
+}
+
+.description-inner:after {
+  top: calc(var(--circle-size) / 11);
+  border-color: #65B9CA;
+}
+
+.features {
+  max-width: 550px;
+
+  & li {
+    margin: .5em 0;
+  }
+}
+
+.self {
+  color: var(--red);
+}
+.and {
+  color: var(--pink);
+}
+.others {
+  color: var(--teal);
 }
 
 pre {
   max-width: 100vw;
-  flex: 1;
+  /* flex: 1; */
   padding: 25px;
-  background-color: cornsilk;
+  background-color: cornsilk !important;
   border-radius: 10px;
-  border: 3px solid rgb(238, 242, 182);
+  border: 3px solid #eecc64;
   white-space: pre-wrap;
+  box-shadow: inset 0 0 10px #cfb35f5c;
+}
+
+code {
+  
 }
 
 #root {
-  flex: 2;
+  /* flex: 2; */
 }
 
 /* button {
@@ -77,9 +145,13 @@ button:focus-visible {
 } */
 
 @media screen and (max-width: 700px) {
-	pre {
-		/* white-space: inherit; */
-	}
+	.description {
+    --circle-size: 30vh;
+
+    & h1 {
+      font-size: calc(var(--circle-size) * .21)
+    }
+  }
 }
 
 @media (prefers-color-scheme: light) {

@@ -10,10 +10,19 @@ body {
   min-width: 85vw;
   margin: 0 auto;
   text-align: center;
+
+  .shifts {
+	background-color: var(--cream);
+  }
+
+  .data-panel {
+	background-color: var(--cream);
+  }
+  
 }
 
 @media screen and (max-width: 900px) {
 	#root {
-		/* width: 100vw; */
+		
 	}
 }

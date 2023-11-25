@@ -2,28 +2,41 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="./index.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RangeSlider</title>
+    <title>RangeManger</title>
   </head>
   <body>
     <div class="description">
-      <h1>RangeManger</h1>
-      <h2>A manger for your ranges</h2>
-      <p>Define liner ranges in deep one-dimensional space. Plan events. Make number ranges. Colour them. Nudge them. Love them.</p>
+      <div class="description-inner">
+        <h1>RangeManger</h1>
+        <h2>A React manger for your ranges</h2>
+        <p>Define liner ranges in deep one-dimensional space. Plan events. Make number ranges. Colour them. Nudge them. Love them.</p>
+      </div>
     </div>
     <div id="root"></div>
+    <div class="features">
+      <ul>
+        <li>Create multiple ranges with touch-friendly interactions that mimic popular calendar apps</li>
+        <li>Lock down individual thumbs, then move the unlocked parts as one unit. Slide that schedule for later in the day! ☕️</li>
+        <li>Units of measurement include <strong>numbers</strong> and <strong>hours of the day</strong> (it's easy to add more)</li>
+        <li>Define ranges by many different factors including start/end, start/length, and intervals between ranges</li>
+        <li>Give your individual ranges <span class="self">colours</span> <span class="and">and</span> <span class="others">names</span> for those Vaporwave-themed events</li>
+      </ul>
+    </div>
     <pre>
-import RangeManger from &#39;./components/RangeManger&#39;
-import Range from &#39;./components/Range&#39;
-
-&lt;RangeManger gradiation=&#39;120&#39; onChange={changeHandler}&gt;
-  &lt;Range className=&quot;first&quot; x=&quot;0&quot; size=&quot;10&quot; fixed=&quot;left&quot; /&gt;
-  &lt;Range className=&quot;second&quot; x=&quot;40&quot; size=&quot;10&quot; color=&quot;#32a976&quot; /&gt;
-  &lt;Range  x=&quot;60&quot; size=&quot;10&quot; /&gt;
-  &lt;Range x=&quot;90&quot; size=&quot;10&quot; fixed=&quot;right&quot; /&gt;
-&lt;/RangeManger&gt;
+<code class="language-html">
+  import RangeManger, {Range} from &#39;range-manger&#39;
+  
+  &lt;RangeManger gradiation=&#39;120&#39; localStoreData=&#39;false&#39;&gt;
+    &lt;Range x=&quot;15&quot; size=&quot;20&quot; color=&quot;#c23b4d&quot; fixed=&quot;left&quot; /&gt;
+    &lt;Range x=&quot;40&quot; size=&quot;20&quot; color=&quot;#DA87B2&quot; /&gt;
+    &lt;Range x=&quot;65&quot; size=&quot;20&quot; color=&quot;#65B9CA&quot; fixed=&quot;right&quot; /&gt;
+  &lt;/RangeManger&gt;
+</code>
     </pre>
     <script type="module" src="./main.jsx"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
   </body>
 </html>

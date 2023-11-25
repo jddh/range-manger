@@ -1,16 +1,16 @@
 {
-  "name": "range_manger",
+  "name": "range-manger",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.9.0",
   "type": "module",
-  "main": "dist/range_manger",
+  "main": "dist/range-manger",
   "files": [
     "dist/*"
   ],
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "build:demo": "vite build --config vite-demo.config.js && mv dist-demo/demo/index.html dist-demo",
+    "build:demo": "vite build --config vite-demo.config.js && mv dist-demo/demo/index.html dist-demo && rmdir dist-demo/demo",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "preview:demo": "vite preview --config vite-demo.config.js",
@@ -21,8 +21,8 @@
     "short-unique-id": "^5.0.3"
   },
   "peerDependencies": {
-    "react": "^17 || ^18",
-    "react-dom": "^17 || ^18"
+    "react": ">=17",
+    "react-dom": ">=17"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

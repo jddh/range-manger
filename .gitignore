@@ -14,7 +14,7 @@ dist-demo
 *.local
 package-lock.json
 coverage
-# dev
+dev
 
 # Editor directories and files
 .vscode/*

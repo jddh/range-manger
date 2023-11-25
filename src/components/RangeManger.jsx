@@ -14,7 +14,6 @@ import { hexToRgb, arraysEqual, convertToBooleanVars } from '../functions/utilit
 import './RangeManger.css'
 import './RangeManger-theme.css'
 
-//TODO: CSS processing
 
 function getOffsets(els, e) {
 	const clientX = getClientX(e)
@@ -469,7 +468,7 @@ export default function RangeManger({
 	 * @param {string} action 
 	 * @param {string} id 
 	 */
-	//TODO ensure each step has a sufficient storage-side change so that unit value/visual changes are meaningful
+	//TODO ensure each step has a sufficient storage-side change so that values don't get softlocked by conversion
 	function transformRange(transforms, action, id) {
 	currentContainerRect = getRect(container.current)
 	const range = getRange(id)

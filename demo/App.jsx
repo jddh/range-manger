@@ -1,53 +1,34 @@
-import { useState } from 'react'
 import './App.css'
 import RangeManger, {Range} from '../src/components/RangeManger'
-// import Range from './components/Range'
-
-function iChanged(data) {
-	// console.log('a change: ', data);
-}
 
 function App() {
 
 	return (
 		<>
 			<RangeManger 
-				// units="time"
-				// units="numerical"
-				// gamut={['900', '1800']}
-				// gamut={['50', '1500']}
-				// gradiation={['400', '1100']}
 				gradiation='120'
-				// changeColor='false'
-				// addMore='false'
-				// showInfo="false"
-				localStoreData='false'
-				// showTitles='false'
-				onChange={iChanged}>
+				localStoreData='false'>
 
-				{/* <Range
-					className="first"
-					x="0"
-					size="10"
+				<Range
+					title="Self"
+					x="15"
+					size="20"
+					color="#c23b4d"
 					fixed="left"
 				/>
 				<Range 
-					className="second"
+					title="and"
 					x="40"
-					size="10"
-					color="#32a976"
+					size="20"
+					color="#DA87B2"
 				/>
 				<Range 
-					title="hihi"
-					x="60"
-					size="10"
-					color="#000000"
-				/>
-				<Range
-					x="90"
-					size="10"
+					x="65"
+					title="Others"
+					size="20"
+					color="#65B9CA"
 					fixed="right"
-				/> */}
+				/>
 			</RangeManger>
 		</>
 	)
