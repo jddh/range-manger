@@ -1,11 +1,7 @@
-.theme {
+.range-manger.theme {
 	--ui-border: #C0C0C0;
 	--ui-bg: #FAFAFA;
 	font-size: 16px;
-
-.range-slider {
-	
-}
 
 .shifts {
 	border: 1px solid var(--ui-border);
@@ -31,6 +27,7 @@
 	.body {
 		
 	}
+	/* //TODO centre info btn when handles are missing */
 
 	& button {
 		--size: 60px;
@@ -266,4 +263,6 @@
 @media screen and (max-height: 450px) {
 	
 }
+}
+
 }

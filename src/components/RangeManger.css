@@ -2,14 +2,11 @@
 	
 }
 
-body {
-	margin: 0;
-}
-
-.range-slider {
+.range-manger {
 	width: 100%;
-}
 
+
+/* TODO css containment? */
 .shifts {
 	position: relative;
 	display: flex;
@@ -264,4 +261,6 @@ fieldset {
 
 @media screen and (max-height: 450px) {
 	
+}
+
 }

@@ -85,6 +85,7 @@ const Range = forwardRef(function (
 	}
 
 	function getInfo(e) {
+		//stop bubbling so the range position tooltips don't fire
 		e.stopPropagation()
 		toggleInfoWindow(id, getBounds())
 	}

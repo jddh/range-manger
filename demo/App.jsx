@@ -14,7 +14,6 @@ function App() {
 					x="15"
 					size="20"
 					color="#c23b4d"
-					fixed="left"
 				/>
 				<Range 
 					title="and"
@@ -27,7 +26,6 @@ function App() {
 					title="Others"
 					size="20"
 					color="#65B9CA"
-					fixed="right"
 				/>
 			</RangeManger>
 		</>

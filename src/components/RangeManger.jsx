@@ -529,7 +529,7 @@ export default function RangeManger({
 	}
 
 	return (
-		<div className={classNames({'disable-touch-drag': disableTouchDrag, theme: userUseTheme}, 'range-slider')}>
+		<div className={classNames({'disable-touch-drag': disableTouchDrag, theme: userUseTheme}, 'range-manger')}>
 		<div className={classNames({'drag': dragging, 'disable-touch-drag': disableTouchDrag}, 'shifts', 'ui')} ref={container}>
 			{rangeData.map((child, index) => 
 				<Range 
