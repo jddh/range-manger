@@ -287,16 +287,18 @@ export default function RangeManger({
 	function releaseRange(e) {
 		let rangesToUpdate = []
 		//if cursor has actually moved
-		if (e.clientX ) {
+		//TODO consider cancelling state change if move isn't significant
+		// if (e.clientX ) {
 		activeIDs.forEach(id => {
 			const bounds = getRangeRef(id).getBounds()
 			const left = getPerc(bounds.left, currentContainerRect.width)
 			const width = getPerc(bounds.width, currentContainerRect.width)
 			rangesToUpdate.push([{x: left, size: width}, id])
-		}) }
-		else {
-			rangesToUpdate = activeIDs.map(id => [{factive: false}, id])
-		}
+		})
+		// }
+		// else {
+			// rangesToUpdate = activeIDs.map(id => [{factive: false}, id])
+		// }
 
 		setDragging(false)
 		setRanges(rangesToUpdate)
@@ -350,6 +352,7 @@ export default function RangeManger({
 	 * @param {number} intent 
 	 * @returns {boolean|string}
 	 */
+	//BUG once "breached", collision doesn't register
 	function isCollision(mouseX, intent) {
 		const rect = createAggregateDimensions(movingEls)
 		let mouseIntent
