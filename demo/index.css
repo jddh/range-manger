@@ -35,6 +35,7 @@ h1 {
 
 h2 {
   font-size: 35px;
+  line-height: 1.1;
 }
 
 .description:before, .description:after, .description-inner:after {
@@ -79,7 +80,8 @@ h2 {
   }
 
   & h2 {
-    margin-top: calc(var(--circle-size) * .85);
+    margin-top: calc(var(--circle-size) * .88);
+    margin-bottom: calc(var(--circle-size) * .11);
   }
 }
 
@@ -107,7 +109,8 @@ h2 {
 }
 
 pre {
-  max-width: 100vw;
+  box-sizing: border-box;
+  max-width: 90%;
   /* flex: 1; */
   padding: 25px;
   background-color: cornsilk !important;
@@ -119,6 +122,31 @@ pre {
 
 code {
   
+}
+
+aside {
+  position: absolute;
+  left: 20px;
+  top: 15px;
+
+  & ul, li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    line-height: 0;
+  }
+
+  & a {
+    display: inline-block;
+    opacity: .5;
+  }
+
+  .github {
+    width: 30px;
+    height: 30px;
+    background: url('/assets/github.svg') center top / cover no-repeat;
+    font-size: 0;
+  }
 }
 
 #root {
@@ -151,6 +179,15 @@ button:focus-visible {
     & h1 {
       font-size: calc(var(--circle-size) * .21)
     }
+  }
+
+  pre {
+    
+  }
+
+  code[class*=language-] {
+    /* font-size: .8em; */
+    /* white-space: initial; */
   }
 }
 

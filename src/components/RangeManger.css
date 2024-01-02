@@ -1,9 +1,25 @@
-:root {
+.range-manger {
+	width: 100%;
+
+
+/* forms */
+& input, select {
 	
 }
 
-.range-manger {
-	width: 100%;
+& input[type="color"] {
+	background-color: transparent;
+}
+
+& button {
+	
+}
+
+& fieldset {
+	& label {
+		
+	}
+}
 
 
 /* TODO css containment? */
@@ -34,7 +50,7 @@
 	position: absolute;
 	z-index: 2;
 	top: 0;
-	border: 1px solid currentColor;
+	border: 1px solid currentcolor;
 	cursor: grab;
 
 	&.second {
@@ -116,11 +132,11 @@
 		height: 100%;
 		cursor: col-resize;
 	
-		&:after {
+		&::after {
 			
 		}
 
-		&.last:after {
+		&.last::after {
 			
 		}
 	}
@@ -139,13 +155,13 @@
 		min-width: 4.5em;
 	}
 
-	&:after {
+	&::after {
 		content: '';
 		position: absolute;
 		left: 0;
 		height: 100%;
 		width: 1px;
-		background-color: currentColor;
+		background-color: currentcolor;
 	}
 }
 
@@ -163,7 +179,7 @@
 		touch-action: none;
 	}
 
-	&:after {
+	&::after {
 		
 	}
 }
@@ -181,7 +197,7 @@
 		flex: 1;
 		visibility: hidden;
 
-		&:after {
+		&::after {
 			
 		}
 
@@ -197,7 +213,7 @@
 		& input {
 			
 
-			&[type=number] {
+			&[type="number"] {
 				
 			}
 		}
@@ -238,24 +254,7 @@
 	}
 }
 
-/* forms */
-input, select {
-	
-}
 
-input[type=color] {
-	background-color: transparent;
-}
-
-button {
-	
-}
-
-fieldset {
-	& label {
-		
-	}
-}
 
 
 

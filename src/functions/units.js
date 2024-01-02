@@ -105,7 +105,7 @@ function percentageOfDayToMinutes(percentage, gamut = gamutStore) {
 	if (percentage < 0 || percentage > 100) {
 		return "Invalid percentage"
 	}
-	const rangedMinutesInDay = (24 * 60) * ((gamutStore[1] - gamutStore[0]) / 100)
+	const rangedMinutesInDay = (24 * 60) * ((gamut[1] - gamut[0]) / 100)
 	const rangedMinutes = Math.round((percentage / 100) * rangedMinutesInDay)
 
 	return rangedMinutes
