@@ -64,7 +64,7 @@ export default function RangeManger({
 		localStoreData = true,
 		showTitles = true,
 		useTheme = true,
-		pxGrid = .2,
+		pxGrid = .5,
 		minRangeSize = 40,
 		onChange,
 		children
@@ -292,8 +292,10 @@ export default function RangeManger({
 		activeIDs.forEach(id => {
 			const bounds = getRangeRef(id).getBounds()
 			const left = getPerc(bounds.left, currentContainerRect.width)
+			const styleLeft = parseFloat(getRangeRef(id).el.style.left)
 			const width = getPerc(bounds.width, currentContainerRect.width)
-			rangesToUpdate.push([{x: left, size: width}, id])
+			const styleWidth = parseFloat(getRangeRef(id).el.style.width)
+			rangesToUpdate.push([{x: styleLeft, size: styleWidth}, id])
 		})
 		// }
 		// else {

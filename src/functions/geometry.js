@@ -45,5 +45,6 @@ export function getRect(el) {
 export function gridSnap(x, round) {
 	const decimalRound = round		//snap to sub-pixels at these marks
 	const factor = 1 / decimalRound
-	return Math.round(x * factor) / factor
+	// return Math.round(x * factor) / factor 	// disabled. uncomment to switch to grid snapping
+	return x
 }

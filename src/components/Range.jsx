@@ -68,15 +68,20 @@ const Range = forwardRef(function (
 	}
 
 	function updateToolTips() {
-		// console.log(getThisRect().left)
 		const bounds = getBounds()
+		const styleLeft = parseFloat(element.current.style.left)
+		const styleWidth = parseFloat(element.current.style.width)
+		const styleRight = styleLeft + styleWidth
 		const leftTime = Units.getUnitValue(getPerc(bounds.left, currentContainerRect.width))
+		const styleLeftTime = Units.getUnitValue(element.current.style.left)
 		const rightTime = Units.getUnitValue(getPerc(bounds.right, currentContainerRect.width))
+		const styleRightTime = Units.getUnitValue(styleRight)
 		const widthTime = Units.getUnitAmount(getPerc(bounds.width, currentContainerRect.width))
+		const styleWidthTime = Units.getUnitAmount(styleWidth)
 
-		element.current.querySelector('.active-label.left').innerText = leftTime
-		element.current.querySelector('.active-label.size').innerText = widthTime
-		element.current.querySelector('.active-label.right').innerText = rightTime
+		element.current.querySelector('.active-label.left').innerText = styleLeftTime
+		element.current.querySelector('.active-label.size').innerText = styleWidthTime
+		element.current.querySelector('.active-label.right').innerText = styleRightTime
 	}
 	// end tooltip
 
